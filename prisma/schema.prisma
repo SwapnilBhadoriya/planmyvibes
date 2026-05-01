@@ -12,4 +12,487 @@ datasource db {
   provider = "postgresql"
 }
 
+// Destinations
+model Destination {
+  id        String   @id @db.VarChar(100)
+
+  name      String   @db.VarChar(100)
+  slug      String   @unique @db.VarChar(150)
+
+  type      DestinationType
+
+  parentId  String?  @db.VarChar(100)
+  parent    Destination? @relation("DestinationHierarchy", fields: [parentId], references: [id])
+  children  Destination[] @relation("DestinationHierarchy")
+
+  country   String?  @db.VarChar(100)
+  state     String?  @db.VarChar(100)
+
+  description       String? @db.Text
+  shortDescription  String? @db.VarChar(255)
+
+  bestTimeStartMonth Int?
+  bestTimeEndMonth   Int?
+  bestTimeNote       String? @db.Text
+
+  avgBudgetPerDay Int?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  places Place[]
+  collections Collection[]
+  itineraryDestinations ItineraryDestination[]
+  itineraryDays ItineraryDay[]
+
+  @@map("destinations")
+}
+
+enum DestinationType {
+  country
+  state
+  city
+}
+
+
+//Places
+model Place {
+  id        String   @id @db.VarChar(100)
+
+  name      String?  @db.VarChar(255)
+
+  destinationId String? @db.VarChar(100)
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  type String? @db.VarChar(50) 
+  description String? @db.Text
+
+  priceMin Int?
+  priceMax Int?
+
+  durationMinutes Int?
+
+  rating Decimal? @db.Decimal(2, 1)
+
+  address          String? @db.Text
+  googleMapsLink   String? @db.Text
+
+  createdAt DateTime @default(now())
+  activePlaces ActivityPlace[]
+  collectionItems CollectionItem[]
+
+  fromTransports Transport[] @relation("FromPlace")
+  toTransports   Transport[] @relation("ToPlace")
+ 
+  @@map("places")
+}
+
+// Itinerary
+model Itinerary {
+  id        String   @id @db.VarChar(100)
+
+  title     String?  @db.VarChar(255)
+  subtitle  String?  @db.VarChar(255)
+  description String? @db.Text
+
+  durationDays Int?
+
+  budgetMin Int?
+  budgetMax Int?
+  currency  String? @db.VarChar(10)
+
+  tripType   TripType?
+  difficulty DifficultyLevel?
+
+  minPeople Int?
+  maxPeople Int?
+
+  totalPlaces     Int?
+  estimatedBudget Int?
+
+  travelMode TravelMode?
+  stayNights Int?
+
+  createdAt DateTime @default(now())
+  savedItineraries SavedItinerary[]
+  itineraryDestinations ItineraryDestination[]
+  itineraryDays ItineraryDay[]
+
+  @@map("itineraries")
+}
+
+enum TravelMode {
+  car
+  bike
+  train
+  flight
+  bus
+  mixed
+}
+
+enum TripType {
+  solo
+  couple
+  family
+  group
+}
+
+enum DifficultyLevel {
+  easy
+  moderate
+  hard
+}
+model ItineraryDestination {
+  id Int @id @default(autoincrement())
+
+  itineraryId   String @db.VarChar(100)
+  itinerary     Itinerary @relation(fields: [itineraryId], references: [id])
+
+  destinationId String @db.VarChar(100)
+  destination   Destination @relation(fields: [destinationId], references: [id])
+
+  position Int?
+
+  @@map("itinerary_destinations")
+
+  @@index([itineraryId])
+  @@index([destinationId])
+}
+
+model ItineraryDay {
+  id Int @id @default(autoincrement())
+
+  itineraryId String @db.VarChar(100)
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id])
+
+  dayNumber Int?
+  title     String? @db.VarChar(255)
+
+  destinationId String? @db.VarChar(100)
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  @@map("itinerary_days")
+
+  @@index([itineraryId])
+  @@index([destinationId])
+
+  activities Activity[]
+
+  @@unique([itineraryId, dayNumber]) // ensures no duplicate day numbers per itinerary
+}
+
+model Activity {
+  id String @id @db.VarChar(100)
+
+  dayId Int?
+  day   ItineraryDay? @relation(fields: [dayId], references: [id])
+
+  title String? @db.VarChar(255)
+
+  activityType ActivityType?
+
+  startTime DateTime? @db.Time
+  endTime   DateTime? @db.Time
+
+  position Int?
+
+  notes String? @db.Text
+
+  isOptional Boolean @default(false)
+  activePlaces ActivityPlace[]
+  transports Transport[]
+
+  @@map("activities")
+
+  @@index([dayId])
+}
+
+enum ActivityType {
+  sightseeing
+  food
+  travel
+  adventure
+  relaxation
+  shopping
+  other
+}
+
+model ActivityPlace {
+  id Int @id @default(autoincrement())
+
+  activityId String @db.VarChar(100)
+  activity   Activity @relation(fields: [activityId], references: [id])
+
+  placeId String @db.VarChar(100)
+  place   Place @relation(fields: [placeId], references: [id])
+
+  @@map("activity_places")
+
+  @@index([activityId])
+  @@index([placeId])
+
+  @@unique([activityId, placeId]) // prevents duplicate mapping
+}
+
+model Transport {
+  id Int @id @default(autoincrement())
+
+  activityId String? @db.VarChar(100)
+  activity   Activity? @relation(fields: [activityId], references: [id])
+
+  mode TransportMode?
+
+  provider String? @db.VarChar(100)
+
+  fromPlaceId String? @db.VarChar(100)
+  fromPlace   Place? @relation("FromPlace", fields: [fromPlaceId], references: [id])
+
+  toPlaceId String? @db.VarChar(100)
+  toPlace   Place? @relation("ToPlace", fields: [toPlaceId], references: [id])
+
+  durationMinutes Int?
+  distanceKm Decimal? @db.Decimal(5, 2)
+  cost Int?
+
+  notes String? @db.Text
+
+  @@map("transports")
+
+  @@index([activityId])
+  @@index([fromPlaceId])
+  @@index([toPlaceId])
+}
+
+enum TransportMode {
+  walk
+  scooter
+  bike
+  car
+  cab
+  bus
+  metro
+  train
+  flight
+}
+
+model Collection {
+  id String @id @db.VarChar(100)
+
+  title       String? @db.VarChar(255)
+  description String? @db.Text
+
+  destinationId String? @db.VarChar(100)
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  type String? @db.VarChar(50) 
+
+  createdAt DateTime @default(now())
+  collectionItems CollectionItem[]
+
+  @@map("collections")
+
+  @@index([destinationId])
+}
+
+model CollectionItem {
+  id Int @id @default(autoincrement())
+
+  collectionId String @db.VarChar(100)
+  collection   Collection @relation(fields: [collectionId], references: [id])
+
+  placeId String @db.VarChar(100)
+  place   Place @relation(fields: [placeId], references: [id])
+
+  position Int?
+
+  @@map("collection_items")
+
+  @@index([collectionId])
+  @@index([placeId])
+
+  @@unique([collectionId, placeId]) // prevent duplicate place in same collection
+}
+
+model Blog {
+  id String @id @db.VarChar(100)
+
+  title String? @db.VarChar(255)
+  slug  String? @unique @db.VarChar(255)
+
+  content String? @db.Text
+
+  entityType String @db.VarChar(50) 
+  entityId   String? @db.VarChar(100)
+
+  type String? @db.VarChar(50) 
+
+  createdAt DateTime @default(now())
+
+  @@map("blogs")
+
+  @@index([entityType, entityId])
+}
+
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar(50)
+
+  type String? @db.VarChar(50) 
+  // vibe / budget / audience / category (flexible)
+
+  createdAt DateTime @default(now())
+
+  mappings TagMapping[]
+
+  @@map("tags")
+}
+
+model TagMapping {
+  id Int @id @default(autoincrement())
+
+  tagId Int
+  tag   Tag @relation(fields: [tagId], references: [id])
+
+  entityType String @db.VarChar(50) 
+  // place / itinerary / blog / collection
+
+  entityId String @db.VarChar(100)
+
+  @@map("tag_mappings")
+
+  @@index([tagId])
+  @@index([entityType, entityId])
+
+  @@unique([tagId, entityType, entityId])
+}
+
+model Tip {
+  id Int @id @default(autoincrement())
+
+  entityType String @db.VarChar(50)
+  entityId   String @db.VarChar(100)
+
+  type    String? @db.VarChar(50)
+  content String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@map("tips")
+
+  @@index([entityType, entityId])
+}
+
+model Image {
+  id Int @id @default(autoincrement())
+
+  url String @db.Text
+  altText String? @db.VarChar(255)
+
+  entityType String @db.VarChar(50)
+  entityId   String @db.VarChar(100)
+
+  isPrimary Boolean @default(false)
+  position  Int @default(1)
+
+  createdAt DateTime @default(now())
+
+  @@map("images")
+
+  @@index([entityType, entityId])
+  @@index([isPrimary])
+}
+
+model Review {
+  id Int @id @default(autoincrement())
+
+  entityType String @db.VarChar(50)
+  entityId   String @db.VarChar(100)
+
+  rating Int?
+  comment String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
+
+  @@index([entityType, entityId])
+}
+
+model User {
+  id String @id @db.VarChar(100)
+
+  name  String? @db.VarChar(100)
+  email String? @unique @db.VarChar(255)
+
+  image String? @db.Text
+
+  role String @default("user") @db.VarChar(20)
+
+  createdAt DateTime @default(now())
+  comments Comment[] 
+  savedItineraries SavedItinerary[]
+
+  @@map("users")
+  likes Like[]
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+
+  entityType String @db.VarChar(50)
+  entityId   String @db.VarChar(100)
+
+  userId String @db.VarChar(100)
+  user   User   @relation(fields: [userId], references: [id])
+
+  content String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@map("comments")
+
+  @@index([entityType, entityId])
+  @@index([userId])
+}
+
+model SavedItinerary {
+  id Int @id @default(autoincrement())
+
+  userId String @db.VarChar(100)
+  user   User   @relation(fields: [userId], references: [id])
+
+  itineraryId String @db.VarChar(100)
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("saved_itineraries")
+
+  @@unique([userId, itineraryId]) // prevents duplicate saves
+
+  @@index([userId])
+  @@index([itineraryId])
+}
+
+model Like {
+  id Int @id @default(autoincrement())
+
+  userId String @db.VarChar(100)
+  user   User   @relation(fields: [userId], references: [id])
+
+  entityType String @db.VarChar(50)
+  entityId   String @db.VarChar(100)
+
+  createdAt DateTime @default(now())
+
+  @@map("likes")
+
+  @@unique([userId, entityType, entityId])
+
+  @@index([userId])
+  @@index([entityType, entityId])
+}
 
