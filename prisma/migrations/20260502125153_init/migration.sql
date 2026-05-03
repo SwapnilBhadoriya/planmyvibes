@@ -18,7 +18,7 @@ CREATE TYPE "TransportMode" AS ENUM ('walk', 'scooter', 'bike', 'car', 'cab', 'b
 
 -- CreateTable
 CREATE TABLE "destinations" (
-    "id" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "slug" VARCHAR(150) NOT NULL,
     "type" "DestinationType" NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE "destinations" (
 
 -- CreateTable
 CREATE TABLE "places" (
-    "id" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
     "name" VARCHAR(255),
     "destinationId" VARCHAR(100),
     "type" VARCHAR(50),
@@ -58,7 +58,7 @@ CREATE TABLE "places" (
 
 -- CreateTable
 CREATE TABLE "itineraries" (
-    "id" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
     "title" VARCHAR(255),
     "subtitle" VARCHAR(255),
     "description" TEXT,
@@ -102,7 +102,7 @@ CREATE TABLE "itinerary_days" (
 
 -- CreateTable
 CREATE TABLE "activities" (
-    "id" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
     "dayId" INTEGER,
     "title" VARCHAR(255),
     "activityType" "ActivityType",
@@ -142,7 +142,7 @@ CREATE TABLE "transports" (
 
 -- CreateTable
 CREATE TABLE "collections" (
-    "id" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
     "title" VARCHAR(255),
     "description" TEXT,
     "destinationId" VARCHAR(100),
@@ -164,7 +164,7 @@ CREATE TABLE "collection_items" (
 
 -- CreateTable
 CREATE TABLE "blogs" (
-    "id" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
     "title" VARCHAR(255),
     "slug" VARCHAR(255),
     "content" TEXT,
@@ -218,6 +218,7 @@ CREATE TABLE "images" (
     "isPrimary" BOOLEAN NOT NULL DEFAULT false,
     "position" INTEGER NOT NULL DEFAULT 1,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "type" VARCHAR(50),
 
     CONSTRAINT "images_pkey" PRIMARY KEY ("id")
 );
@@ -236,7 +237,7 @@ CREATE TABLE "reviews" (
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
     "name" VARCHAR(100),
     "email" VARCHAR(255),
     "image" TEXT,
@@ -391,58 +392,58 @@ CREATE UNIQUE INDEX "likes_userId_entityType_entityId_key" ON "likes"("userId", 
 ALTER TABLE "destinations" ADD CONSTRAINT "destinations_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "destinations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "places" ADD CONSTRAINT "places_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "places" ADD CONSTRAINT "places_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "itinerary_destinations" ADD CONSTRAINT "itinerary_destinations_itineraryId_fkey" FOREIGN KEY ("itineraryId") REFERENCES "itineraries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "itinerary_destinations" ADD CONSTRAINT "itinerary_destinations_itineraryId_fkey" FOREIGN KEY ("itineraryId") REFERENCES "itineraries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "itinerary_destinations" ADD CONSTRAINT "itinerary_destinations_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "itinerary_destinations" ADD CONSTRAINT "itinerary_destinations_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "itinerary_days" ADD CONSTRAINT "itinerary_days_itineraryId_fkey" FOREIGN KEY ("itineraryId") REFERENCES "itineraries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "itinerary_days" ADD CONSTRAINT "itinerary_days_itineraryId_fkey" FOREIGN KEY ("itineraryId") REFERENCES "itineraries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "itinerary_days" ADD CONSTRAINT "itinerary_days_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "itinerary_days" ADD CONSTRAINT "itinerary_days_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "activities" ADD CONSTRAINT "activities_dayId_fkey" FOREIGN KEY ("dayId") REFERENCES "itinerary_days"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "activities" ADD CONSTRAINT "activities_dayId_fkey" FOREIGN KEY ("dayId") REFERENCES "itinerary_days"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "activity_places" ADD CONSTRAINT "activity_places_activityId_fkey" FOREIGN KEY ("activityId") REFERENCES "activities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "activity_places" ADD CONSTRAINT "activity_places_activityId_fkey" FOREIGN KEY ("activityId") REFERENCES "activities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "activity_places" ADD CONSTRAINT "activity_places_placeId_fkey" FOREIGN KEY ("placeId") REFERENCES "places"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "activity_places" ADD CONSTRAINT "activity_places_placeId_fkey" FOREIGN KEY ("placeId") REFERENCES "places"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "transports" ADD CONSTRAINT "transports_activityId_fkey" FOREIGN KEY ("activityId") REFERENCES "activities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "transports" ADD CONSTRAINT "transports_activityId_fkey" FOREIGN KEY ("activityId") REFERENCES "activities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "transports" ADD CONSTRAINT "transports_fromPlaceId_fkey" FOREIGN KEY ("fromPlaceId") REFERENCES "places"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "transports" ADD CONSTRAINT "transports_fromPlaceId_fkey" FOREIGN KEY ("fromPlaceId") REFERENCES "places"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "transports" ADD CONSTRAINT "transports_toPlaceId_fkey" FOREIGN KEY ("toPlaceId") REFERENCES "places"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "transports" ADD CONSTRAINT "transports_toPlaceId_fkey" FOREIGN KEY ("toPlaceId") REFERENCES "places"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "collections" ADD CONSTRAINT "collections_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "collections" ADD CONSTRAINT "collections_destinationId_fkey" FOREIGN KEY ("destinationId") REFERENCES "destinations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "collection_items" ADD CONSTRAINT "collection_items_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "collections"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "collection_items" ADD CONSTRAINT "collection_items_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "collections"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "collection_items" ADD CONSTRAINT "collection_items_placeId_fkey" FOREIGN KEY ("placeId") REFERENCES "places"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "collection_items" ADD CONSTRAINT "collection_items_placeId_fkey" FOREIGN KEY ("placeId") REFERENCES "places"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tag_mappings" ADD CONSTRAINT "tag_mappings_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "tags"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "tag_mappings" ADD CONSTRAINT "tag_mappings_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "tags"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "comments" ADD CONSTRAINT "comments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "comments" ADD CONSTRAINT "comments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "saved_itineraries" ADD CONSTRAINT "saved_itineraries_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "saved_itineraries" ADD CONSTRAINT "saved_itineraries_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "saved_itineraries" ADD CONSTRAINT "saved_itineraries_itineraryId_fkey" FOREIGN KEY ("itineraryId") REFERENCES "itineraries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "saved_itineraries" ADD CONSTRAINT "saved_itineraries_itineraryId_fkey" FOREIGN KEY ("itineraryId") REFERENCES "itineraries"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "likes" ADD CONSTRAINT "likes_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "likes" ADD CONSTRAINT "likes_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

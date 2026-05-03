@@ -14,7 +14,7 @@ datasource db {
 
 // Destinations
 model Destination {
-  id        String   @id @db.VarChar(100)
+  id String @id @default(cuid())
 
   name      String   @db.VarChar(100)
   slug      String   @unique @db.VarChar(150)
@@ -59,12 +59,12 @@ enum DestinationType {
 
 //Places
 model Place {
-  id        String   @id @db.VarChar(100)
+  id String @id @default(cuid())
 
   name      String?  @db.VarChar(255)
 
   destinationId String? @db.VarChar(100)
-  destination   Destination? @relation(fields: [destinationId], references: [id])
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
   type String? @db.VarChar(50) 
   description String? @db.Text
@@ -91,7 +91,7 @@ model Place {
 
 // Itinerary
 model Itinerary {
-  id        String   @id @db.VarChar(100)
+ id String @id @default(cuid())
 
   title     String?  @db.VarChar(255)
   subtitle  String?  @db.VarChar(255)
@@ -148,10 +148,10 @@ model ItineraryDestination {
   id Int @id @default(autoincrement())
 
   itineraryId   String @db.VarChar(100)
-  itinerary     Itinerary @relation(fields: [itineraryId], references: [id])
+  itinerary     Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
 
   destinationId String @db.VarChar(100)
-  destination   Destination @relation(fields: [destinationId], references: [id])
+  destination   Destination @relation(fields: [destinationId], references: [id],onDelete: Cascade)
 
   position Int?
 
@@ -165,13 +165,13 @@ model ItineraryDay {
   id Int @id @default(autoincrement())
 
   itineraryId String @db.VarChar(100)
-  itinerary   Itinerary @relation(fields: [itineraryId], references: [id])
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
 
   dayNumber Int?
   title     String? @db.VarChar(255)
 
   destinationId String? @db.VarChar(100)
-  destination   Destination? @relation(fields: [destinationId], references: [id])
+  destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
   @@map("itinerary_days")
 
@@ -184,10 +184,10 @@ model ItineraryDay {
 }
 
 model Activity {
-  id String @id @db.VarChar(100)
+  id String @id @default(cuid())
 
   dayId Int?
-  day   ItineraryDay? @relation(fields: [dayId], references: [id])
+  day   ItineraryDay? @relation(fields: [dayId], references: [id],onDelete: Cascade)
 
   title String? @db.VarChar(255)
 
@@ -223,10 +223,10 @@ model ActivityPlace {
   id Int @id @default(autoincrement())
 
   activityId String @db.VarChar(100)
-  activity   Activity @relation(fields: [activityId], references: [id])
+  activity   Activity @relation(fields: [activityId], references: [id],onDelete: Cascade)
 
   placeId String @db.VarChar(100)
-  place   Place @relation(fields: [placeId], references: [id])
+  place   Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@map("activity_places")
 
@@ -240,17 +240,17 @@ model Transport {
   id Int @id @default(autoincrement())
 
   activityId String? @db.VarChar(100)
-  activity   Activity? @relation(fields: [activityId], references: [id])
+  activity   Activity? @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   mode TransportMode?
 
   provider String? @db.VarChar(100)
 
   fromPlaceId String? @db.VarChar(100)
-  fromPlace   Place? @relation("FromPlace", fields: [fromPlaceId], references: [id])
+  fromPlace   Place? @relation("FromPlace", fields: [fromPlaceId], references: [id], onDelete: Cascade)
 
   toPlaceId String? @db.VarChar(100)
-  toPlace   Place? @relation("ToPlace", fields: [toPlaceId], references: [id])
+  toPlace   Place? @relation("ToPlace", fields: [toPlaceId], references: [id], onDelete: Cascade)
 
   durationMinutes Int?
   distanceKm Decimal? @db.Decimal(5, 2)
@@ -278,13 +278,13 @@ enum TransportMode {
 }
 
 model Collection {
-  id String @id @db.VarChar(100)
+  id String @id @default(cuid())
 
   title       String? @db.VarChar(255)
   description String? @db.Text
 
   destinationId String? @db.VarChar(100)
-  destination   Destination? @relation(fields: [destinationId], references: [id])
+  destination   Destination? @relation(fields: [destinationId], references: [id],onDelete: Cascade)
 
   type String? @db.VarChar(50) 
 
@@ -300,10 +300,10 @@ model CollectionItem {
   id Int @id @default(autoincrement())
 
   collectionId String @db.VarChar(100)
-  collection   Collection @relation(fields: [collectionId], references: [id])
+  collection   Collection @relation(fields: [collectionId], references: [id],onDelete: Cascade)
 
   placeId String @db.VarChar(100)
-  place   Place @relation(fields: [placeId], references: [id])
+  place   Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   position Int?
 
@@ -316,7 +316,7 @@ model CollectionItem {
 }
 
 model Blog {
-  id String @id @db.VarChar(100)
+  id String @id @default(cuid())
 
   title String? @db.VarChar(255)
   slug  String? @unique @db.VarChar(255)
@@ -354,7 +354,7 @@ model TagMapping {
   id Int @id @default(autoincrement())
 
   tagId Int
-  tag   Tag @relation(fields: [tagId], references: [id])
+  tag   Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   entityType String @db.VarChar(50) 
   // place / itinerary / blog / collection
@@ -399,6 +399,9 @@ model Image {
 
   createdAt DateTime @default(now())
 
+  type String? @db.VarChar(50) 
+  // banner / cover / gallery / thumbnail
+
   @@map("images")
 
   @@index([entityType, entityId])
@@ -422,7 +425,7 @@ model Review {
 }
 
 model User {
-  id String @id @db.VarChar(100)
+  id String @id @default(cuid())
 
   name  String? @db.VarChar(100)
   email String? @unique @db.VarChar(255)
@@ -446,7 +449,7 @@ model Comment {
   entityId   String @db.VarChar(100)
 
   userId String @db.VarChar(100)
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   content String? @db.Text
 
@@ -462,10 +465,10 @@ model SavedItinerary {
   id Int @id @default(autoincrement())
 
   userId String @db.VarChar(100)
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id],onDelete: Cascade)
 
   itineraryId String @db.VarChar(100)
-  itinerary   Itinerary @relation(fields: [itineraryId], references: [id])
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -481,7 +484,7 @@ model Like {
   id Int @id @default(autoincrement())
 
   userId String @db.VarChar(100)
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   entityType String @db.VarChar(50)
   entityId   String @db.VarChar(100)
