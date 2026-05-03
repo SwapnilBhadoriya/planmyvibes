@@ -61,9 +61,9 @@ enum DestinationType {
 model Place {
   id String @id @default(cuid())
 
-  name      String?  @db.VarChar(255)
+  name      String  @db.VarChar(255)
 
-  destinationId String? @db.VarChar(100)
+  destinationId String @db.VarChar(100)
   destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
   type String? @db.VarChar(50) 
