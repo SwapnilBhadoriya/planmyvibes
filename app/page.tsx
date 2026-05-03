@@ -1,14 +1,12 @@
-import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/home/HeroSection";
 import PopularDestinations from "@/components/home/PopularDestinations";
 import FeatureHighlights from "@/components/home/FeatureHighlights";
 import TrendingItineraries from "@/components/home/TrendingItineraries";
 import VibeFinder from "@/components/home/VibeFinder";
 
-export default function Home() {
+export default function HomePage() {
     return (
         <>
-            <Navbar />
             <main>
                 <HeroSection />
 
