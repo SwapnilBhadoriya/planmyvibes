@@ -23,7 +23,7 @@ export async function createPlaceWithImagesService({
       throw new Error("Destination not found");
     }
 
-  
+
     const place = await tx.place.create({
       data,
     });
@@ -73,7 +73,7 @@ export async function createPlaceWithImagesService({
       }
     }
 
-    
+
     if (images.length) {
       await tx.image.createMany({ data: images });
     }
@@ -85,22 +85,38 @@ export async function createPlaceWithImagesService({
 export async function getPlacesService(params: {
   destinationId?: string | null;
   type?: string | null;
+  search?: string | null;
+  limit?: number | null;
 }) {
-  const { destinationId, type } = params;
+  const { destinationId, type, search, limit } = params;
 
   const places = await prisma.place.findMany({
     where: {
       ...(destinationId ? { destinationId } : {}),
       ...(type ? { type } : {}),
+      ...(search ? { name: { contains: search, mode: "insensitive" } } : {}),
     },
+    ...(limit ? { take: limit } : {}),
+
+    include: {
+      destination: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+        },
+      },
+    },
+
     orderBy: { createdAt: "desc" },
   });
+
 
   if (!places.length) return [];
 
   const ids = places.map((p) => p.id);
 
-  
+
   const images = await prisma.image.findMany({
     where: {
       entityType: "PLACE",
@@ -196,7 +212,7 @@ export async function deletePlaceService(id: string) {
     }
   }
 
-  
+
   return await prisma.$transaction(async (tx) => {
     // delete images (DB)
     await tx.image.deleteMany({
@@ -206,7 +222,7 @@ export async function deletePlaceService(id: string) {
       },
     });
 
-    
+
     await tx.place.delete({
       where: { id },
     });
@@ -298,9 +314,9 @@ export async function updatePlaceService({
       });
     }
 
-    
 
- 
+
+
     if (removeGalleryIds?.length) {
       const imagesToDelete = existingImages.filter((img) =>
         removeGalleryIds.includes(img.id)
