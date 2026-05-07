@@ -117,6 +117,7 @@ export async function getCollectionsService(params: {
     description: col.description,
     type: col.type,
     destination: col.destination,
+    createdAt: col.createdAt,
 
     places: col.collectionItems.map((item) => ({
       ...item.place,

@@ -68,10 +68,14 @@ export async function GET(req: Request) {
 
         const destinationId = searchParams.get("destinationId");
         const type = searchParams.get("type");
+        const search = searchParams.get("search");
+        const limit = searchParams.get("limit") ? Number(searchParams.get("limit")) : null;
 
         const data = await getPlacesService({
             destinationId,
             type,
+            search,
+            limit,
         });
 
         return NextResponse.json({
