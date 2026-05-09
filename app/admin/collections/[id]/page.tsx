@@ -111,6 +111,14 @@ export default function ViewCollectionPage({ params }: { params: Promise<{ id: s
                 </div>
             )}
 
+            {/* Cover image */}
+            {collection.coverImage && (
+                <div className="mb-5 overflow-hidden rounded-xl border border-border">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={collection.coverImage} alt={collection.title ?? "Cover"} className="h-64 w-full object-cover sm:h-80" />
+                </div>
+            )}
+
             {/* Meta badges */}
             <div className="mb-5 flex flex-wrap items-center gap-2">
                 {collection.type && (

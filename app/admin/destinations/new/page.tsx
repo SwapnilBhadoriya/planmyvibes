@@ -7,22 +7,22 @@ import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/layout/admin-page-header";
 import { Button } from "@/components/ui/button";
 import { DestinationForm } from "../components/destination-form";
+import { syncTags } from "@/components/admin/tag-input";
 
 export default function NewDestinationPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [tags, setTags] = useState<string[]>([]);
 
     async function handleSubmit(formData: FormData) {
         setIsSubmitting(true);
         setSubmitError(null);
         try {
-            const res = await fetch("/api/destinations", {
-                method: "POST",
-                body: formData,
-            });
+            const res = await fetch("/api/destinations", { method: "POST", body: formData });
             const json = await res.json();
             if (!json.success) throw new Error(json.message ?? "Failed to create destination");
+            await syncTags("DESTINATION", json.data.id, tags);
             router.push("/admin/destinations");
         } catch (e: any) {
             setSubmitError(e.message ?? "Something went wrong");
@@ -38,10 +38,7 @@ export default function NewDestinationPage() {
                 subtitle="Create a new country, state, or city."
                 action={
                     <Button variant="outline" size="sm" asChild>
-                        <Link href="/admin/destinations">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to list
-                        </Link>
+                        <Link href="/admin/destinations"><ArrowLeft className="mr-2 h-4 w-4" />Back to list</Link>
                     </Button>
                 }
             />
@@ -52,11 +49,7 @@ export default function NewDestinationPage() {
                 </div>
             )}
 
-            <DestinationForm
-                onSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-                cancelHref="/admin/destinations"
-            />
+            <DestinationForm onSubmit={handleSubmit} isSubmitting={isSubmitting} cancelHref="/admin/destinations" tags={tags} onTagsChange={setTags} />
         </div>
     );
 }

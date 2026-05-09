@@ -78,8 +78,10 @@ export async function POST(req: Request) {
 const querySchema = z.object({
     type: z.enum(["country", "state", "city"]).optional(),
     parentId: z.string().optional(),
+    search: z.string().optional(),
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(20),
 });
-
 
 export async function GET(req: Request) {
     try {
@@ -88,14 +90,14 @@ export async function GET(req: Request) {
         const parsed = querySchema.parse({
             type: searchParams.get("type") ?? undefined,
             parentId: searchParams.get("parentId") ?? undefined,
+            search: searchParams.get("search") ?? undefined,
+            page: searchParams.get("page") ?? undefined,
+            limit: searchParams.get("limit") ?? undefined,
         });
 
-        const data = await getDestinationsService(parsed);
+        const result = await getDestinationsService(parsed);
 
-        return NextResponse.json({
-            success: true,
-            data,
-        });
+        return NextResponse.json({ success: true, ...result });
     } catch (error: any) {
         return NextResponse.json(
             { success: false, message: error.message },

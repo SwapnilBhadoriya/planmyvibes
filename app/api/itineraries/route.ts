@@ -28,6 +28,7 @@ const querySchema = z.object({
     difficulty: z.enum(["easy", "moderate", "hard"]).optional(),
     travelMode: z.enum(["car", "bike", "train", "flight", "bus", "mixed"]).optional(),
     destinationId: z.string().optional(),
+    search: z.string().optional(),
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(20),
 });
@@ -41,6 +42,7 @@ export async function GET(req: Request) {
             difficulty: searchParams.get("difficulty") ?? undefined,
             travelMode: searchParams.get("travelMode") ?? undefined,
             destinationId: searchParams.get("destinationId") ?? undefined,
+            search: searchParams.get("search") ?? undefined,
             page: searchParams.get("page") ?? undefined,
             limit: searchParams.get("limit") ?? undefined,
         });

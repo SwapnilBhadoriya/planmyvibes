@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/admin/dialogs/confirm-dialog";
 import { DestinationForm } from "../../components/destination-form";
 import { type DestinationDetail } from "../../components/destination-columns";
+import { syncTags } from "@/components/admin/tag-input";
 
 export default function EditDestinationPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -22,6 +23,7 @@ export default function EditDestinationPage({ params }: { params: Promise<{ id: 
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [tags, setTags] = useState<string[]>([]);
 
     useEffect(() => {
         fetch(`/api/destinations/${id}`)
@@ -44,6 +46,7 @@ export default function EditDestinationPage({ params }: { params: Promise<{ id: 
             });
             const json = await res.json();
             if (!json.success) throw new Error(json.message ?? "Failed to update destination");
+            await syncTags("DESTINATION", id, tags);
             router.push(`/admin/destinations/${id}`);
         } catch (e: any) {
             setSubmitError(e.message ?? "Something went wrong");
@@ -130,6 +133,8 @@ export default function EditDestinationPage({ params }: { params: Promise<{ id: 
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
                     cancelHref={`/admin/destinations/${id}`}
+                    tags={tags}
+                    onTagsChange={setTags}
                 />
             )}
 

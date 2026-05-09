@@ -44,20 +44,18 @@ export async function PUT(
       description,
       destinationId,
       type,
+      coverImage,
       addPlaceIds,
       removePlaceIds,
       orderedPlaceIds,
     } = body;
 
-   
-    const data = Object.fromEntries(
-      Object.entries({
-        title,
-        description,
-        destinationId,
-        type,
-      }).filter(([_, v]) => v !== undefined)
-    );
+    const data: Record<string, unknown> = {};
+    if (title !== undefined) data.title = title;
+    if (description !== undefined) data.description = description;
+    if (destinationId !== undefined) data.destinationId = destinationId;
+    if (type !== undefined) data.type = type;
+    if (coverImage !== undefined) data.coverImage = coverImage; // allow null to clear
 
     const result = await updateCollectionService({
       id,

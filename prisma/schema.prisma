@@ -115,12 +115,19 @@ model Itinerary {
   travelMode TravelMode?
   stayNights Int?
 
+  status ContentStatus @default(DRAFT)
+
   createdAt DateTime @default(now())
   savedItineraries SavedItinerary[]
   itineraryDestinations ItineraryDestination[]
   itineraryDays ItineraryDay[]
 
   @@map("itineraries")
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
 }
 
 enum TravelMode {
@@ -170,6 +177,8 @@ model ItineraryDay {
   dayNumber Int?
   title     String? @db.VarChar(255)
 
+  coverImageUrl String? @db.Text
+
   destinationId String? @db.VarChar(100)
   destination   Destination? @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
@@ -193,8 +202,8 @@ model Activity {
 
   activityType ActivityType?
 
-  startTime DateTime? @db.Time
-  endTime   DateTime? @db.Time
+  startTime       String? @db.VarChar(5)
+  durationMinutes Int?
 
   position Int?
 
@@ -286,7 +295,9 @@ model Collection {
   destinationId String? @db.VarChar(100)
   destination   Destination? @relation(fields: [destinationId], references: [id],onDelete: Cascade)
 
-  type String? @db.VarChar(50) 
+  type String? @db.VarChar(50)
+
+  status ContentStatus @default(DRAFT)
 
   createdAt DateTime @default(now())
   collectionItems CollectionItem[]
@@ -326,7 +337,9 @@ model Blog {
   entityType String @db.VarChar(50) 
   entityId   String? @db.VarChar(100)
 
-  type String? @db.VarChar(50) 
+  type String? @db.VarChar(50)
+
+  status ContentStatus @default(DRAFT)
 
   createdAt DateTime @default(now())
 

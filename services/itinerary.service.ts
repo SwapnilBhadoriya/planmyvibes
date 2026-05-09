@@ -46,13 +46,6 @@ const ITINERARY_FULL_INCLUDE = {
 
 type Tx = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
 
-function parseTime(timeStr: string): Date {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    const d = new Date();
-    d.setHours(hours, minutes, 0, 0);
-    return d;
-}
-
 // Shared helper — used by both create and update
 async function createDaysWithActivities(tx: Tx, itineraryId: string, days: DayInput[]) {
     for (const day of days) {
@@ -82,8 +75,8 @@ async function createDaysWithActivities(tx: Tx, itineraryId: string, days: DayIn
                     dayId: itineraryDay.id,
                     title: activity.title,
                     activityType: activity.activityType,
-                    startTime: activity.startTime ? parseTime(activity.startTime) : undefined,
-                    endTime: activity.endTime ? parseTime(activity.endTime) : undefined,
+                    startTime: activity.startTime,
+                    durationMinutes: activity.durationMinutes,
                     position: activity.position,
                     notes: activity.notes,
                     isOptional: activity.isOptional,
@@ -153,20 +146,6 @@ async function createDaysWithActivities(tx: Tx, itineraryId: string, days: DayIn
                 });
             }
 
-            // Images
-            if (activity.images?.length) {
-                await tx.image.createMany({
-                    data: activity.images.map((img, idx) => ({
-                        url: img.url,
-                        altText: img.altText,
-                        entityType: "ACTIVITY",
-                        entityId: created.id,
-                        type: img.type,
-                        isPrimary: img.isPrimary,
-                        position: img.position ?? idx + 1,
-                    })),
-                });
-            }
         }
     }
 }
@@ -212,6 +191,7 @@ export async function createItineraryService(data: ItineraryInput) {
                 maxPeople: data.maxPeople,
                 totalPlaces: data.totalPlaces,
                 estimatedBudget: data.estimatedBudget,
+                status: data.status,
             },
         });
 
@@ -250,16 +230,18 @@ export async function getItinerariesService(params: {
     difficulty?: string;
     travelMode?: string;
     destinationId?: string;
+    search?: string;
     page?: number;
     limit?: number;
 }) {
-    const { tripType, difficulty, travelMode, destinationId, page = 1, limit = 20 } = params;
+    const { tripType, difficulty, travelMode, destinationId, search, page = 1, limit = 20 } = params;
 
     const where: any = {
         ...(tripType ? { tripType: tripType as any } : {}),
         ...(difficulty ? { difficulty: difficulty as any } : {}),
         ...(travelMode ? { travelMode: travelMode as any } : {}),
         ...(destinationId ? { itineraryDestinations: { some: { destinationId } } } : {}),
+        ...(search ? { title: { contains: search, mode: "insensitive" } } : {}),
     };
 
     const [total, itineraries] = await Promise.all([
@@ -297,23 +279,10 @@ export async function getItineraryByIdService(id: string) {
           })
         : ([] as Awaited<ReturnType<typeof prisma.tip.findMany>>);
 
-    const images = activityIds.length
-        ? await prisma.image.findMany({
-              where: { entityType: "ACTIVITY", entityId: { in: activityIds } },
-              orderBy: { position: "asc" },
-          })
-        : ([] as Awaited<ReturnType<typeof prisma.image.findMany>>);
-
     const tipsMap: Record<string, typeof tips> = {};
-    const imagesMap: Record<string, typeof images> = {};
-
     for (const tip of tips) {
         if (!tipsMap[tip.entityId]) tipsMap[tip.entityId] = [];
         tipsMap[tip.entityId].push(tip);
-    }
-    for (const img of images) {
-        if (!imagesMap[img.entityId]) imagesMap[img.entityId] = [];
-        imagesMap[img.entityId].push(img);
     }
 
     return {
@@ -323,7 +292,6 @@ export async function getItineraryByIdService(id: string) {
             activities: day.activities.map((activity) => ({
                 ...activity,
                 tips: tipsMap[activity.id] ?? [],
-                images: imagesMap[activity.id] ?? [],
             })),
         })),
     };
@@ -410,26 +378,6 @@ async function syncActivitySubResources(tx: Tx, activityId: string, activity: Sy
         }
     }
 
-    // ── Images ──────────────────────────────────────────────────────────────
-    if (activity.images !== undefined) {
-        const existing    = await tx.image.findMany({ where: { entityType: "ACTIVITY", entityId: activityId }, select: { id: true } });
-        const existingIds = new Set(existing.map((i) => i.id));
-        const payloadIds  = new Set(activity.images.filter((i) => i.id).map((i) => i.id!));
-
-        const toDelete = [...existingIds].filter((id) => !payloadIds.has(id));
-        if (toDelete.length) await tx.image.deleteMany({ where: { id: { in: toDelete } } });
-
-        for (const [idx, img] of activity.images.entries()) {
-            const { id, ...fields } = img;
-            if (id && existingIds.has(id)) {
-                await tx.image.update({ where: { id }, data: { altText: fields.altText, isPrimary: fields.isPrimary, position: fields.position } });
-            } else if (!id) {
-                await tx.image.create({
-                    data: { entityType: "ACTIVITY", entityId: activityId, ...fields, position: fields.position ?? idx + 1 },
-                });
-            }
-        }
-    }
 }
 
 async function syncDayActivities(tx: Tx, dayId: number, activities: SyncActivity[]) {
@@ -441,22 +389,17 @@ async function syncDayActivities(tx: Tx, dayId: number, activities: SyncActivity
     const toDelete = [...existingIds].filter((id) => !payloadIds.has(id));
     if (toDelete.length) {
         await tx.tip.deleteMany({ where: { entityType: "ACTIVITY", entityId: { in: toDelete } } });
-        await tx.image.deleteMany({ where: { entityType: "ACTIVITY", entityId: { in: toDelete } } });
         await tx.activity.deleteMany({ where: { id: { in: toDelete } } });
     }
 
     for (const activity of activities) {
-        const { id, placeIds, transports, tips, images, startTime, endTime, ...fields } = activity;
+        const { id, placeIds, transports, tips, ...fields } = activity;
 
         if (id && existingIds.has(id)) {
             // Update existing activity scalar fields
             await tx.activity.update({
                 where: { id },
-                data: {
-                    ...fields,
-                    ...(startTime ? { startTime: parseTime(startTime) } : {}),
-                    ...(endTime   ? { endTime:   parseTime(endTime)   } : {}),
-                },
+                data: { ...fields },
             });
             await syncActivitySubResources(tx, id, activity);
         } else if (!id) {
@@ -466,8 +409,6 @@ async function syncDayActivities(tx: Tx, dayId: number, activities: SyncActivity
                     dayId,
                     ...fields,
                     isOptional: fields.isOptional ?? false,
-                    ...(startTime ? { startTime: parseTime(startTime) } : {}),
-                    ...(endTime   ? { endTime:   parseTime(endTime)   } : {}),
                 },
             });
             // Sub-resources for new activities — treat everything as "add"
@@ -524,7 +465,6 @@ export async function syncItineraryService(id: string, data: ItinerarySyncInput)
                 const activityIds = daysToDelete.flatMap((d) => d.activities.map((a) => a.id));
                 if (activityIds.length) {
                     await tx.tip.deleteMany({ where: { entityType: "ACTIVITY", entityId: { in: activityIds } } });
-                    await tx.image.deleteMany({ where: { entityType: "ACTIVITY", entityId: { in: activityIds } } });
                 }
                 await tx.itineraryDay.deleteMany({ where: { id: { in: daysToDelete.map((d) => d.id) } } });
             }

@@ -5,6 +5,7 @@ import { useDragReorder } from "@/hooks/use-drag-reorder";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, X, Search, GripVertical } from "lucide-react";
+import { CoverImageField } from "@/components/admin/cover-image-field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type CollectionDetail, type CollectionPlace } from "../../components/collection-columns";
+import { TagInput, syncTags } from "@/components/admin/tag-input";
 
 const formSchema = z.object({
     title: z.string().optional(),
@@ -48,7 +50,11 @@ export default function EditCollectionPage({ params }: { params: Promise<{ id: s
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitIntent, setSubmitIntent] = useState<"DRAFT" | "PUBLISHED" | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const pendingStatusRef = useRef<"DRAFT" | "PUBLISHED">("DRAFT");
+    const [coverImage, setCoverImage] = useState("");
+    const [tags, setTags] = useState<string[]>([]);
 
     // Places state — ordered list
     const [places, setPlaces] = useState<CollectionPlace[]>([]);
@@ -73,6 +79,7 @@ export default function EditCollectionPage({ params }: { params: Promise<{ id: s
                 const c: CollectionDetail = json.data;
                 setCollection(c);
                 setPlaces(c.places);
+                setCoverImage(c.coverImage ?? "");
                 reset({
                     title: c.title ?? "",
                     description: c.description ?? "",
@@ -128,6 +135,7 @@ export default function EditCollectionPage({ params }: { params: Promise<{ id: s
     const drag = useDragReorder(places, setPlaces);
 
     async function onFormSubmit(values: FormValues) {
+        const status = pendingStatusRef.current;
         setIsSubmitting(true);
         setError(null);
         try {
@@ -135,6 +143,8 @@ export default function EditCollectionPage({ params }: { params: Promise<{ id: s
             if (values.title !== undefined) body.title = values.title || null;
             if (values.description !== undefined) body.description = values.description || null;
             if (values.type !== undefined) body.type = values.type || null;
+            body.coverImage = coverImage || null;
+            body.status = status;
 
             if (removedIds.size) body.removePlaceIds = [...removedIds];
             if (addedIds.size) body.addPlaceIds = [...addedIds];
@@ -149,6 +159,7 @@ export default function EditCollectionPage({ params }: { params: Promise<{ id: s
             });
             const json = await res.json();
             if (!json.success) throw new Error(json.message ?? "Failed to update collection");
+            await syncTags("COLLECTION", id, tags);
             router.push(`/admin/collections/${id}`);
         } catch (e: any) {
             setError(e.message);
@@ -219,6 +230,13 @@ export default function EditCollectionPage({ params }: { params: Promise<{ id: s
                         <div className="sm:col-span-2">
                             <Label htmlFor="col-desc">Description</Label>
                             <Textarea id="col-desc" className="mt-1.5" rows={3} placeholder="Describe this collection" {...register("description")} />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <Label className="mb-1.5 block text-sm font-medium">Tags</Label>
+                            <TagInput entityType="COLLECTION" entityId={id} value={tags} onChange={setTags} />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <CoverImageField value={coverImage} onChange={setCoverImage} />
                         </div>
                     </div>
                 </Section>
@@ -314,9 +332,15 @@ export default function EditCollectionPage({ params }: { params: Promise<{ id: s
                     <Button type="button" variant="outline" asChild>
                         <Link href={`/admin/collections/${id}`}>Cancel</Link>
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Save changes
+                    {collection?.status !== "PUBLISHED" && (
+                        <Button type="submit" variant="outline" disabled={isSubmitting} onClick={() => { pendingStatusRef.current = "DRAFT"; setSubmitIntent("DRAFT"); }}>
+                            {isSubmitting && submitIntent === "DRAFT" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save as Draft
+                        </Button>
+                    )}
+                    <Button type="submit" disabled={isSubmitting} onClick={() => { pendingStatusRef.current = "PUBLISHED"; setSubmitIntent("PUBLISHED"); }}>
+                        {isSubmitting && submitIntent === "PUBLISHED" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save & Publish
                     </Button>
                 </div>
             </form>

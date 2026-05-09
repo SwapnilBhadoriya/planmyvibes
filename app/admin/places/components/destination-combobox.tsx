@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Check, ChevronDown, Search, X } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Check, ChevronDown, Search, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DestinationOption {
@@ -23,17 +23,48 @@ export function DestinationCombobox({ value, onChange, error, disabled }: Destin
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [destinations, setDestinations] = useState<DestinationOption[]>([]);
+    const [selectedLabel, setSelectedLabel] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    useEffect(() => {
+    const search = useCallback((q: string) => {
         setLoading(true);
-        fetch("/api/destinations")
+        const params = new URLSearchParams({ limit: "15" });
+        if (q) params.set("search", q);
+        fetch(`/api/destinations?${params}`)
             .then((r) => r.json())
-            .then((json) => { if (json.success) setDestinations(json.data); })
+            .then((json) => { if (json.success) setDestinations(json.data ?? []); })
+            .catch(() => {})
             .finally(() => setLoading(false));
     }, []);
+
+    // Initial load of selected item label
+    useEffect(() => {
+        if (!value) { setSelectedLabel(""); return; }
+        fetch(`/api/destinations/${value}`)
+            .then((r) => r.json())
+            .then((json) => { if (json.success) setSelectedLabel(json.data?.name ?? ""); })
+            .catch(() => {});
+    }, [value]);
+
+    // Debounced search when query changes
+    useEffect(() => {
+        if (!open) return;
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => search(query), 300);
+        return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+    }, [query, open, search]);
+
+    // Load initial results when dropdown opens
+    useEffect(() => {
+        if (open) {
+            search(query);
+            setTimeout(() => inputRef.current?.focus(), 50);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -46,22 +77,9 @@ export function DestinationCombobox({ value, onChange, error, disabled }: Destin
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    useEffect(() => {
-        if (open) setTimeout(() => inputRef.current?.focus(), 50);
-    }, [open]);
-
-    const selected = destinations.find((d) => d.id === value);
-
-    const filtered = destinations
-        .filter((d) =>
-            !query ||
-            d.name.toLowerCase().includes(query.toLowerCase()) ||
-            (d.country ?? "").toLowerCase().includes(query.toLowerCase())
-        )
-        .slice(0, 10);
-
     function handleSelect(dest: DestinationOption) {
         onChange(dest.id, dest.name);
+        setSelectedLabel(dest.name);
         setOpen(false);
         setQuery("");
     }
@@ -69,11 +87,11 @@ export function DestinationCombobox({ value, onChange, error, disabled }: Destin
     function handleClear(e: React.MouseEvent) {
         e.stopPropagation();
         onChange("", "");
+        setSelectedLabel("");
     }
 
     return (
         <div ref={containerRef} className="relative">
-            {/* Trigger */}
             <button
                 type="button"
                 disabled={disabled}
@@ -86,11 +104,11 @@ export function DestinationCombobox({ value, onChange, error, disabled }: Destin
                     open && "ring-1 ring-ring"
                 )}
             >
-                <span className={cn("truncate", !selected && "text-muted-foreground")}>
-                    {loading ? "Loading destinations…" : selected ? selected.name : "Search destination…"}
+                <span className={cn("truncate", !selectedLabel && "text-muted-foreground")}>
+                    {selectedLabel || "Search destination…"}
                 </span>
                 <span className="flex shrink-0 items-center gap-1">
-                    {selected && (
+                    {selectedLabel && (
                         <span
                             role="button"
                             tabIndex={0}
@@ -105,10 +123,8 @@ export function DestinationCombobox({ value, onChange, error, disabled }: Destin
                 </span>
             </button>
 
-            {/* Dropdown */}
             {open && (
                 <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-border bg-white shadow-md">
-                    {/* Search input */}
                     <div className="flex items-center gap-2 border-b border-border px-3 py-2">
                         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                         <input
@@ -118,16 +134,16 @@ export function DestinationCombobox({ value, onChange, error, disabled }: Destin
                             placeholder="Type to search…"
                             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                         />
+                        {loading && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />}
                     </div>
 
-                    {/* List */}
                     <ul className="max-h-52 overflow-y-auto p-1">
-                        {filtered.length === 0 ? (
+                        {!loading && destinations.length === 0 ? (
                             <li className="px-3 py-6 text-center text-sm text-muted-foreground">
-                                {query ? "No destinations match your search" : "No destinations found"}
+                                {query ? "No destinations match" : "No destinations found"}
                             </li>
                         ) : (
-                            filtered.map((dest) => (
+                            destinations.map((dest) => (
                                 <li
                                     key={dest.id}
                                     onClick={() => handleSelect(dest)}

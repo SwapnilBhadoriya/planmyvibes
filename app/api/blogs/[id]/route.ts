@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { deleteBlogService, getBlogByIdService, updateBlogService } from "@/services/blog.service";
-import { blogSchema } from "@/lib/validations/blog.schema";
+import { blogUpdateSchema } from "@/lib/validations/blog.schema";
 
 export async function DELETE(
   req: Request,
@@ -40,7 +40,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const validated = blogSchema.partial().parse(body);
+    const validated = blogUpdateSchema.parse(body);
     const data = Object.fromEntries(
       Object.entries(validated).filter(([_, v]) => v !== undefined)
     );
