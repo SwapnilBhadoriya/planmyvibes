@@ -10,7 +10,7 @@ export function useCollections() {
 
     useEffect(() => {
         setIsLoading(true);
-        fetch("/api/collections")
+        fetch("/api/collections?limit=100")
             .then((r) => r.json())
             .then((json) => {
                 if (json.success) setCollections(json.data ?? []);

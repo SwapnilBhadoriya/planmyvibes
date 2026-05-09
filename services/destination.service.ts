@@ -62,43 +62,47 @@ export async function createDestinationService({
 export async function getDestinationsService(params: {
   type?: "country" | "state" | "city";
   parentId?: string | null;
+  search?: string | null;
+  page?: number;
+  limit?: number;
 }) {
-  const { type, parentId } = params;
+  const { type, parentId, search, page = 1, limit = 20 } = params;
 
-  const destinations = await prisma.destination.findMany({
-    where: {
-      ...(type ? { type } : {}),
-      ...(parentId ? { parentId } : {}),
-    },
-    orderBy: { name: "asc" },
-  });
+  const where = {
+    ...(type ? { type } : {}),
+    ...(parentId ? { parentId } : {}),
+    ...(search ? { name: { contains: search, mode: "insensitive" as const } } : {}),
+  };
 
-  if (!destinations.length) return [];
+  const [total, destinations] = await Promise.all([
+    prisma.destination.count({ where }),
+    prisma.destination.findMany({
+      where,
+      orderBy: { name: "asc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
 
   const ids = destinations.map((d) => d.id);
 
-  
-  const images = await prisma.image.findMany({
-    where: {
-      entityType: "DESTINATION",
-      entityId: { in: ids },
-    },
-    orderBy: { position: "asc" },
-  });
+  const images = ids.length
+    ? await prisma.image.findMany({
+        where: { entityType: "DESTINATION", entityId: { in: ids } },
+        orderBy: { position: "asc" },
+      })
+    : [];
 
   const imageMap: Record<string, any[]> = {};
-
   for (const img of images) {
-    if (!imageMap[img.entityId]) {
-      imageMap[img.entityId] = [];
-    }
+    if (!imageMap[img.entityId]) imageMap[img.entityId] = [];
     imageMap[img.entityId].push(img);
   }
 
-  return destinations.map((dest) => ({
-    ...dest,
-    images: imageMap[dest.id] || [],
-  }));
+  return {
+    data: destinations.map((dest) => ({ ...dest, images: imageMap[dest.id] || [] })),
+    pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 export async function updateDestinationService({

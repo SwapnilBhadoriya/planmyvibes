@@ -19,34 +19,32 @@ export const tipSchema = z.object({
 });
 
 export const activityImageSchema = z.object({
-    url: z.url("Invalid image URL"),
+    url: z.string().min(1, "Image URL is required"),
     altText: z.string().max(255).optional(),
     type: z.enum(["banner", "cover", "gallery", "thumbnail"]).default("gallery"),
     isPrimary: z.boolean().default(false),
     position: z.number().int().positive().optional(),
 });
 
-const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-
 export const activitySchema = z.object({
     title: z.string().max(255).optional(),
     activityType: z
         .enum(["sightseeing", "food", "travel", "adventure", "relaxation", "shopping", "other"])
         .optional(),
-    startTime: z.string().regex(timeRegex, "startTime must be in HH:MM format (24h)").optional(),
-    endTime: z.string().regex(timeRegex, "endTime must be in HH:MM format (24h)").optional(),
+    startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Must be HH:MM format").optional(),
+    durationMinutes: z.number().int().positive().optional(),
     position: z.number().int().positive().optional(),
     notes: z.string().optional(),
     isOptional: z.boolean().default(false),
     placeIds: z.array(z.string().min(1)).optional(),
     transports: z.array(transportSchema).optional(),
     tips: z.array(tipSchema).optional(),
-    images: z.array(activityImageSchema).optional(),
 });
 
 export const daySchema = z.object({
     dayNumber: z.number().int().positive("Day number must be a positive integer"),
     title: z.string().max(255).optional(),
+    coverImageUrl: z.string().optional(),
     destinationId: z.string().min(1).optional(),
     activities: z.array(activitySchema).optional(),
 });
@@ -54,6 +52,7 @@ export const daySchema = z.object({
 // Granular day update — only fields that belong to the day row itself
 export const dayUpdateSchema = z.object({
     title: z.string().max(255).optional(),
+    coverImageUrl: z.string().optional(),
     destinationId: z.string().min(1).optional(),
 });
 
@@ -63,8 +62,8 @@ export const activityUpdateSchema = z.object({
     activityType: z
         .enum(["sightseeing", "food", "travel", "adventure", "relaxation", "shopping", "other"])
         .optional(),
-    startTime: z.string().regex(timeRegex, "startTime must be in HH:MM format (24h)").optional(),
-    endTime: z.string().regex(timeRegex, "endTime must be in HH:MM format (24h)").optional(),
+    startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Must be HH:MM format").optional(),
+    durationMinutes: z.number().int().positive().optional(),
     position: z.number().int().positive().optional(),
     notes: z.string().optional(),
     isOptional: z.boolean().optional(),
@@ -119,6 +118,7 @@ const itineraryBaseSchema = z.object({
     maxPeople: z.number().int().positive().optional(),
     totalPlaces: z.number().int().nonnegative().optional(),
     estimatedBudget: z.number().int().nonnegative().optional(),
+    status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
     destinationIds: z.array(destinationEntrySchema).optional(),
     days: z.array(daySchema).optional(),
 });
@@ -183,21 +183,21 @@ const syncActivitySchema = z.object({
     activityType: z
         .enum(["sightseeing", "food", "travel", "adventure", "relaxation", "shopping", "other"])
         .optional(),
-    startTime: z.string().regex(timeRegex, "startTime must be in HH:MM format (24h)").optional(),
-    endTime: z.string().regex(timeRegex, "endTime must be in HH:MM format (24h)").optional(),
+    startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Must be HH:MM format").optional(),
+    durationMinutes: z.number().int().positive().optional(),
     position: z.number().int().positive().optional(),
     notes: z.string().optional(),
     isOptional: z.boolean().default(false),
     placeIds: z.array(z.string().min(1)).optional(),
     transports: z.array(syncTransportSchema).optional(),
     tips: z.array(syncTipSchema).optional(),
-    images: z.array(syncImageSchema).optional(),
 });
 
 const syncDaySchema = z.object({
     id: z.number().int().positive().optional(),
     dayNumber: z.number().int().positive("Day number must be a positive integer"),
     title: z.string().max(255).optional(),
+    coverImageUrl: z.string().optional(),
     destinationId: z.string().min(1).optional(),
     activities: z.array(syncActivitySchema).optional(),
 });

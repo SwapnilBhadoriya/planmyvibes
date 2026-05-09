@@ -5,6 +5,7 @@ import { useDragReorder } from "@/hooks/use-drag-reorder";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, X, Search, GripVertical } from "lucide-react";
+import { CoverImageField } from "@/components/admin/cover-image-field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DestinationCombobox } from "../../places/components/destination-combobox";
+import { TagInput, syncTags } from "@/components/admin/tag-input";
 
 const formSchema = z.object({
     title: z.string().min(1, "Title is required"),
@@ -52,8 +54,11 @@ interface SelectedPlace extends SearchPlace {
 export default function NewCollectionPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitIntent, setSubmitIntent] = useState<"DRAFT" | "PUBLISHED" | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [placesError, setPlacesError] = useState<string | null>(null);
+    const [coverImage, setCoverImage] = useState("");
+    const [tags, setTags] = useState<string[]>([]);
 
     const [places, setPlaces] = useState<SelectedPlace[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -99,7 +104,14 @@ export default function NewCollectionPage() {
 
     const drag = useDragReorder(places, setPlaces);
 
+    const pendingStatusRef = useRef<"DRAFT" | "PUBLISHED">("DRAFT");
+
     async function onFormSubmit(values: FormValues) {
+        const status = pendingStatusRef.current;
+        return onFormSubmitWithStatus(values, status);
+    }
+
+    async function onFormSubmitWithStatus(values: FormValues, status: "DRAFT" | "PUBLISHED") {
         if (places.length === 0) {
             setPlacesError("Add at least one place to the collection");
             return;
@@ -117,10 +129,13 @@ export default function NewCollectionPage() {
                     type: values.type || undefined,
                     destinationId: values.destinationId,
                     placeIds: places.map((p) => p.id),
+                    coverImage: coverImage || undefined,
+                    status,
                 }),
             });
             const json = await res.json();
             if (!json.success) throw new Error(json.message ?? "Failed to create collection");
+            await syncTags("COLLECTION", json.data.id, tags);
             router.push("/admin/collections");
         } catch (e: any) {
             setError(e.message);
@@ -178,6 +193,13 @@ export default function NewCollectionPage() {
                         <div className="sm:col-span-2">
                             <Label htmlFor="col-desc">Description</Label>
                             <Textarea id="col-desc" className="mt-1.5" rows={3} placeholder="Describe this collection" {...register("description")} />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <Label className="mb-1.5 block text-sm font-medium">Tags</Label>
+                            <TagInput entityType="COLLECTION" value={tags} onChange={setTags} />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <CoverImageField value={coverImage} onChange={setCoverImage} />
                         </div>
                     </div>
                 </Section>
@@ -272,9 +294,13 @@ export default function NewCollectionPage() {
                     <Button type="button" variant="outline" asChild>
                         <Link href="/admin/collections">Cancel</Link>
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create collection
+                    <Button type="submit" variant="outline" disabled={isSubmitting} onClick={() => { pendingStatusRef.current = "DRAFT"; }}>
+                        {isSubmitting && submitIntent === "DRAFT" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save as Draft
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting} onClick={() => { pendingStatusRef.current = "PUBLISHED"; setSubmitIntent("PUBLISHED"); }}>
+                        {isSubmitting && submitIntent === "PUBLISHED" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Publish
                     </Button>
                 </div>
             </form>

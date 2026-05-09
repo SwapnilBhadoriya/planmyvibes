@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { MONTHS } from "@/lib/constants";
 import { type DestinationDetail } from "./destination-columns";
+import { TagInput } from "@/components/admin/tag-input";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 const formSchema = z.object({
@@ -44,6 +45,8 @@ interface DestinationFormProps {
     onSubmit: (formData: FormData) => Promise<void>;
     isSubmitting: boolean;
     cancelHref?: string;
+    tags: string[];
+    onTagsChange: (tags: string[]) => void;
 }
 
 function toSlug(text: string) {
@@ -152,6 +155,8 @@ export function DestinationForm({
     onSubmit,
     isSubmitting,
     cancelHref = "/admin/destinations",
+    tags,
+    onTagsChange,
 }: DestinationFormProps) {
     const isEdit = !!initialData;
 
@@ -209,9 +214,9 @@ export function DestinationForm({
         if (watchedType === "country") { setParentOptions([]); return; }
         const parentType = watchedType === "state" ? "country" : "state";
         setLoadingParents(true);
-        fetch(`/api/destinations?type=${parentType}`)
+        fetch(`/api/destinations?type=${parentType}&limit=100`)
             .then((r) => r.json())
-            .then((json) => { if (json.success) setParentOptions(json.data); })
+            .then((json) => { if (json.success) setParentOptions(json.data ?? []); })
             .finally(() => setLoadingParents(false));
     }, [watchedType]);
 
@@ -402,6 +407,15 @@ export function DestinationForm({
                             placeholder="Detailed description for the destination page"
                             rows={5}
                             {...register("description")}
+                        />
+                    </div>
+                    <div>
+                        <Label className="mb-1.5 block">Tags</Label>
+                        <TagInput
+                            entityType="DESTINATION"
+                            entityId={initialData?.id}
+                            value={tags}
+                            onChange={onTagsChange}
                         />
                     </div>
                 </div>

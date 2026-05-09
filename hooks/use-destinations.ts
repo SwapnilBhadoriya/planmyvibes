@@ -21,10 +21,10 @@ export function useDestinations(): UseDestinationsReturn {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await fetch("/api/destinations");
+            const res = await fetch("/api/destinations?limit=100");
             const json = await res.json();
             if (!json.success) throw new Error(json.message ?? "Failed to load destinations");
-            setDestinations(json.data);
+            setDestinations(json.data ?? []);
         } catch (e: any) {
             setError(e.message ?? "Failed to load destinations");
         } finally {

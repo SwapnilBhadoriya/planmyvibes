@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminPageHeader } from "@/components/admin/layout/admin-page-header";
 import { PlaceForm } from "../components/place-form";
+import { syncTags } from "@/components/admin/tag-input";
 
 export default function NewPlacePage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [tags, setTags] = useState<string[]>([]);
 
     async function handleSubmit(formData: FormData) {
         setIsSubmitting(true);
@@ -17,6 +19,7 @@ export default function NewPlacePage() {
             const res = await fetch("/api/places", { method: "POST", body: formData });
             const json = await res.json();
             if (!json.success) throw new Error(json.message ?? "Failed to create place");
+            await syncTags("PLACE", json.data.id, tags);
             router.push("/admin/places");
         } catch (e: any) {
             setError(e.message);
@@ -27,10 +30,7 @@ export default function NewPlacePage() {
 
     return (
         <div>
-            <AdminPageHeader
-                title="Add Place"
-                subtitle="Create a new place"
-            />
+            <AdminPageHeader title="Add Place" subtitle="Create a new place" />
 
             {error && (
                 <div className="mb-5 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -38,11 +38,7 @@ export default function NewPlacePage() {
                 </div>
             )}
 
-            <PlaceForm
-                onSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-                cancelHref="/admin/places"
-            />
+            <PlaceForm onSubmit={handleSubmit} isSubmitting={isSubmitting} cancelHref="/admin/places" tags={tags} onTagsChange={setTags} />
         </div>
     );
 }

@@ -86,33 +86,31 @@ export async function getPlacesService(params: {
   destinationId?: string | null;
   type?: string | null;
   search?: string | null;
-  limit?: number | null;
+  page?: number;
+  limit?: number;
 }) {
-  const { destinationId, type, search, limit } = params;
+  const { destinationId, type, search, page = 1, limit = 20 } = params;
 
-  const places = await prisma.place.findMany({
-    where: {
-      ...(destinationId ? { destinationId } : {}),
-      ...(type ? { type } : {}),
-      ...(search ? { name: { contains: search, mode: "insensitive" } } : {}),
-    },
-    ...(limit ? { take: limit } : {}),
+  const where = {
+    ...(destinationId ? { destinationId } : {}),
+    ...(type ? { type } : {}),
+    ...(search ? { name: { contains: search, mode: "insensitive" as const } } : {}),
+  };
 
-    include: {
-      destination: {
-        select: {
-          id: true,
-          name: true,
-          type: true,
-        },
+  const [total, places] = await Promise.all([
+    prisma.place.count({ where }),
+    prisma.place.findMany({
+      where,
+      include: {
+        destination: { select: { id: true, name: true, type: true } },
       },
-    },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
 
-    orderBy: { createdAt: "desc" },
-  });
-
-
-  if (!places.length) return [];
+  if (!places.length) return { data: [], pagination: { total: 0, page, limit, totalPages: 0 } };
 
   const ids = places.map((p) => p.id);
 
@@ -135,15 +133,19 @@ export async function getPlacesService(params: {
     imageMap[img.entityId].push(img);
   }
 
-  return places.map((place) => {
+  const data = places.map((place) => {
     const imgs = imageMap[place.id] || [];
-
     return {
       ...place,
       cover: imgs.find((i) => i.type === "cover") || null,
       gallery: imgs.filter((i) => i.type === "gallery"),
     };
   });
+
+  return {
+    data,
+    pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 export async function getPlaceByIdService(id: string) {

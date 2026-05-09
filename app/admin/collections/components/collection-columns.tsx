@@ -24,6 +24,8 @@ export interface Collection {
     title: string | null;
     description: string | null;
     type: string | null;
+    status: "DRAFT" | "PUBLISHED";
+    coverImage?: string | null;
     destination: { id: string; name: string } | null;
     places: CollectionPlace[];
 }
@@ -84,6 +86,16 @@ export function getCollectionColumns({ onDelete }: ColumnActions): ColumnDef<Col
             cell: ({ row }) => {
                 const count = row.original.places.length;
                 return <span className="text-sm text-muted-foreground">{count} place{count !== 1 ? "s" : ""}</span>;
+            },
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => {
+                const s = row.getValue<string>("status");
+                return s === "PUBLISHED"
+                    ? <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Published</Badge>
+                    : <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Draft</Badge>;
             },
         },
         {

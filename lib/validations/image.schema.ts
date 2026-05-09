@@ -19,8 +19,8 @@ export function validateImageFile(file: File, label: string) {
     throw new Error(`${label} must be jpg/png/webp`);
   }
 
-  const maxSize = 2 * 1024 * 1024; // 2MB
+  const maxSize = 3 * 1024 * 1024; // 3MB
   if (file.size > maxSize) {
-    throw new Error(`${label} must be < 2MB`);
+    throw new Error(`${label} must be < 3MB`);
   }
 }

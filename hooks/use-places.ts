@@ -10,7 +10,7 @@ export function usePlaces() {
 
     useEffect(() => {
         setIsLoading(true);
-        fetch("/api/places")
+        fetch("/api/places?limit=100")
             .then((r) => r.json())
             .then((json) => {
                 if (json.success) setPlaces(json.data ?? []);

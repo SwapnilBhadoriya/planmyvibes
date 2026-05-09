@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { DestinationCombobox } from "./destination-combobox";
 import { type PlaceDetail, type PlaceImage } from "./place-columns";
+import { TagInput } from "@/components/admin/tag-input";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 const formSchema = z.object({
@@ -50,6 +51,8 @@ interface PlaceFormProps {
     onSubmit: (formData: FormData) => Promise<void>;
     isSubmitting: boolean;
     cancelHref?: string;
+    tags: string[];
+    onTagsChange: (tags: string[]) => void;
 }
 
 // ── Section wrapper ────────────────────────────────────────────────────────────
@@ -202,7 +205,7 @@ function GalleryUpload({ existing, onRemoveExisting, newItems, onAddNew, onRemov
 }
 
 // ── Main Form ──────────────────────────────────────────────────────────────────
-export function PlaceForm({ initialData, onSubmit, isSubmitting, cancelHref = "/admin/places" }: PlaceFormProps) {
+export function PlaceForm({ initialData, onSubmit, isSubmitting, cancelHref = "/admin/places", tags, onTagsChange }: PlaceFormProps) {
     const isEdit = !!initialData;
 
     const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormValues>({
@@ -333,6 +336,16 @@ export function PlaceForm({ initialData, onSubmit, isSubmitting, cancelHref = "/
                     <div className="sm:col-span-2">
                         <Label htmlFor="place-desc">Description</Label>
                         <Textarea id="place-desc" className="mt-1.5" rows={4} placeholder="Describe this place" {...register("description")} />
+                    </div>
+
+                    <div className="sm:col-span-2">
+                        <Label className="mb-1.5 block">Tags</Label>
+                        <TagInput
+                            entityType="PLACE"
+                            entityId={initialData?.id}
+                            value={tags}
+                            onChange={onTagsChange}
+                        />
                     </div>
                 </div>
             </Section>

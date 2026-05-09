@@ -10,4 +10,5 @@ export const collectionSchema = z.object({
   type: z.string().optional(),
 
   placeIds: z.array(z.string()).min(1, "At least one place required"),
+  status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
 });
