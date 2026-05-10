@@ -26,7 +26,7 @@ export default function DestinationCard({
     badge, badgeColor, location, country, description, days, price, gradient,
 }: DestinationCardProps) {
     return (
-        <div className={`relative h-44 sm:h-52 lg:h-72 w-full rounded-2xl overflow-hidden cursor-pointer group bg-gradient-to-b ${gradient}`}>
+        <div className={`relative h-48 sm:h-56 xl:h-64 w-full rounded-2xl overflow-hidden cursor-pointer group bg-gradient-to-b ${gradient}`}>
 
             {/* Badge */}
             <span className={`absolute top-2.5 left-2.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${BADGE_STYLES[badgeColor]}`}>
@@ -43,7 +43,7 @@ export default function DestinationCard({
                 <p className="text-sm font-bold text-white leading-tight truncate">{location}</p>
                 <p className="text-[11px] text-white/70 mb-1.5 truncate">{country}</p>
                 {/* Description — hidden on lg (too narrow), visible on sm–md */}
-                <p className="text-[10px] text-white/60 mb-1.5 hidden sm:block lg:hidden truncate">{description}</p>
+                <p className="text-[10px] text-white/60 mb-1.5 hidden sm:block truncate">{description}</p>
                 <div className="flex items-center gap-1.5">
                     <HugeiconsIcon icon={Clock01Icon} size={10} strokeWidth={2} className="text-white/60 shrink-0" />
                     <span className="text-[10px] text-white/70">{days}d</span>

@@ -12,11 +12,11 @@ const TAGS = [
 export default function HeroCategoryTags() {
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
             {TAGS.map((tag) => (
                 <button
                     key={tag.label}
-                    className={`shrink-0 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${tag.color}`}>
+                    className={`shrink-0 flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${tag.color}`}>
                     <span>{tag.emoji}</span>
                     {tag.label}
                 </button>
