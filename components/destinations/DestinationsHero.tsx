@@ -17,22 +17,31 @@ const STATS = [
 
 export default function DestinationsHero() {
     return (
-        <section className="relative overflow-hidden mx-4 lg:mx-6 rounded-3xl min-h-[260px] sm:min-h-[340px] lg:min-h-[300px]">
+        <section className="relative overflow-hidden mx-3 sm:mx-4 xl:mx-6 rounded-2xl xl:rounded-3xl min-h-[260px] sm:min-h-[320px] xl:min-h-[300px]">
 
-            {/* Background image */}
+            {/* Mobile / tablet image (destinations-hero-2) — below xl */}
+            <Image
+                src="/images/destinations-hero-2.png"
+                alt="Destinations hero"
+                fill
+                priority
+                className="object-cover object-center block xl:hidden"
+            />
+
+            {/* Desktop image (destinations-hero) — xl and above */}
             <Image
                 src="/images/destinations-hero.png"
                 alt="Destinations hero"
                 fill
                 priority
-                className="object-cover object-center"
+                className="object-cover object-center hidden xl:block"
             />
 
             {/* Overlay */}
-            <div className="absolute inset-0 bg-white/10" />
+            <div className="absolute inset-0 bg-black/35 xl:bg-white/10" />
 
             {/* Content */}
-            <div className="relative z-10 px-6 sm:px-10 lg:px-16 pt-8 sm:pt-10 pb-14 sm:pb-20 lg:pb-28 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-end min-h-[240px] sm:min-h-[300px] lg:min-h-[380px]">
+            <div className="relative z-10 px-5 sm:px-8 xl:px-16 pt-7 sm:pt-10 pb-10 sm:pb-16 xl:pb-28 grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 xl:gap-10 items-end min-h-[240px] sm:min-h-[300px] xl:min-h-[380px]">
 
                 {/* Left — text */}
                 <div className="flex flex-col gap-2 sm:gap-3 max-w-xl">
@@ -41,9 +50,9 @@ export default function DestinationsHero() {
                         Explore the World
                     </span>
 
-                    <h1 className={`text-3xl sm:text-4xl lg:text-5xl text-white font-extrabold leading-tight ${pacifico.className}`}>
+                    <h1 className={`text-3xl sm:text-4xl xl:text-5xl text-white font-extrabold leading-tight ${pacifico.className}`}>
                         Find your next<br />
-                        <span className="font-[var(--font-pacifico)] text-purple-700 font-normal">
+                        <span className="text-purple-300 font-normal">
                             happy place
                         </span>
                         <span className="text-pink-400 ml-2 text-2xl sm:text-3xl">✦</span>
@@ -56,7 +65,7 @@ export default function DestinationsHero() {
                 </div>
 
                 {/* Stats bar — desktop only */}
-                <div className="hidden lg:flex items-stretch bg-white rounded-2xl shadow-lg overflow-hidden divide-x divide-gray-100 self-end">
+                <div className="hidden xl:flex items-stretch bg-white rounded-2xl shadow-lg overflow-hidden divide-x divide-gray-100 self-end">
                     {STATS.map((s) => (
                         <div key={s.label} className="flex items-center gap-2.5 px-5 py-4">
                             <span className={`shrink-0 ${s.color}`}>
@@ -70,8 +79,8 @@ export default function DestinationsHero() {
                     ))}
                 </div>
 
-                {/* Stats — mobile/tablet: compact pills row */}
-                <div className="flex lg:hidden flex-wrap gap-2 self-end">
+                {/* Stats — mobile/tablet: compact pills */}
+                <div className="flex xl:hidden flex-wrap gap-2 self-end">
                     {STATS.map((s) => (
                         <div key={s.label} className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5">
                             <span className={`shrink-0 ${s.color}`}>
