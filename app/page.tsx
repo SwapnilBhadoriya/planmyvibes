@@ -10,16 +10,16 @@ export default function HomePage() {
             <main>
                 <HeroSection />
 
-                <div className=" px-10 grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-6 items-start relative z-10 -mt-8">
+                <div className="px-3 sm:px-5 xl:px-10 grid grid-cols-1 xl:grid-cols-[1fr_520px] gap-4 xl:gap-6 items-start relative z-10 -mt-4 xl:-mt-8">
 
                     {/* Main content */}
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm mt-8">
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6 shadow-sm mt-4 xl:mt-8">
                         <PopularDestinations />
                         <FeatureHighlights />
                     </div>
 
                     {/* Sidebar */}
-                    <aside className="flex flex-col gap-5">
+                    <aside className="flex flex-col gap-4 xl:gap-5">
                         <TrendingItineraries />
                         <VibeFinder />
                     </aside>

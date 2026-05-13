@@ -11,39 +11,57 @@ const pacifico = Pacifico({
 
 export default function HeroSection() {
     return (
-        <section className="relative overflow-hidden mx-4 lg:mx-6 rounded-3xl min-h-[420px]">
+        <section className="relative overflow-hidden mx-3 sm:mx-4 xl:mx-6 rounded-2xl xl:rounded-3xl min-h-[500px] md:min-h-[540px] xl:min-h-[420px]">
 
-            {/* Background image */}
+            {/* Mobile image (hero2) — below md */}
+            <Image
+                src="/images/hero2.png"
+                alt="Hero background"
+                fill
+                priority
+                className="object-cover object-center block md:hidden"
+            />
+
+            {/* Tablet / iPad Pro image (hero3) — md to xl */}
+            <Image
+                src="/images/hero3.png"
+                alt="Hero background"
+                fill
+                priority
+                className="object-cover object-center hidden md:block xl:hidden"
+            />
+
+            {/* Desktop image (hero) — xl and above */}
             <Image
                 src="/images/hero.png"
                 alt="Hero background"
                 fill
                 priority
-                className="object-cover object-center"
+                className="object-cover object-center hidden xl:block"
             />
 
-            {/* Dark overlay so text stays readable */}
-            <div className="absolute inset-0 bg-black/25" />
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-black/40 md:bg-black/35 xl:bg-black/25" />
 
             {/* Content */}
-            <div className="relative z-10 px-10 lg:px-16 pt-10 pb-6 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10 items-center">
+            <div className="relative z-10 px-5 sm:px-8 md:px-10 xl:px-16 pt-8 sm:pt-10 pb-6 grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 xl:gap-10 items-center">
 
                 {/* Left column */}
-                <div className="flex flex-col gap-4 max-w-3xl">
+                <div className="flex flex-col gap-3 sm:gap-4 max-w-3xl">
 
                     {/* Badge */}
-                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white/90 px-4 py-1 text-sm font-medium text-gray-700 shadow-sm">
+                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white/90 px-3 sm:px-4 py-1 text-xs sm:text-sm font-medium text-gray-700 shadow-sm">
                         ☀️ Your journey begins here
                     </span>
 
                     {/* Headline */}
-                    <h1 className={`text-4xl lg:text-5xl font-bold text-white leading-tight ${pacifico.className}`}>
+                    <h1 className={`text-3xl sm:text-4xl xl:text-5xl font-bold text-white leading-tight ${pacifico.className}`}>
                         Itineraries that inspire,<br />
                         <em className="not-italic text-purple-400">adventures</em> that stay
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="text-sm text-white/70 max-w-md">
+                    <p className="text-xs sm:text-sm text-white/70 max-w-md">
                         Curated travel itineraries for every vibe and every kind of traveler.
                     </p>
 
@@ -55,8 +73,8 @@ export default function HeroSection() {
 
                 </div>
 
-                {/* Right column — Vibe card */}
-                <div className="hidden lg:block">
+                {/* Right column — Vibe card (desktop only) */}
+                <div className="hidden xl:block">
                     <HeroVibeCard />
                 </div>
 
