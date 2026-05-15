@@ -26,7 +26,7 @@ export default function TopPicksHero() {
             />
 
             {/* Overlay */}
-            <div className="absolute inset-0 bg-black/45" />
+            <div className="absolute inset-0 bg-black/45 pointer-events-none" />
 
             {/* Content */}
             <div className="relative z-10 px-5 sm:px-8 xl:px-16 pt-7 sm:pt-10 pb-10 sm:pb-16 xl:pb-28 flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4 xl:gap-10 min-h-[240px] sm:min-h-[300px] xl:min-h-[380px]">

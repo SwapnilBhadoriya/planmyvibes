@@ -191,6 +191,8 @@ export async function createItineraryService(data: ItineraryInput) {
                 maxPeople: data.maxPeople,
                 totalPlaces: data.totalPlaces,
                 estimatedBudget: data.estimatedBudget,
+                coverImageUrl: data.coverImageUrl,
+                bannerImageUrl: data.bannerImageUrl,
                 status: data.status,
             },
         });

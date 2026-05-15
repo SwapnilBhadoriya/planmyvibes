@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { PublicLayout } from "@/components/layout/public-layout";
@@ -12,6 +12,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "TripVibee",
   description: "Plan your vibes",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

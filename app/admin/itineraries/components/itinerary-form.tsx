@@ -77,6 +77,8 @@ export interface ItineraryFormValues {
     minPeople?: number;
     maxPeople?: number;
     estimatedBudget?: number;
+    coverImageUrl?: string;
+    bannerImageUrl?: string;
     destinationIds: { destinationId: string; destinationName: string; position: number }[];
     days: DayItem[];
 }
@@ -659,7 +661,24 @@ export function ItineraryForm({ initialData, onSubmit, isSubmitting, submitInten
         minPeople: initialData?.minPeople ?? "",
         maxPeople: initialData?.maxPeople ?? "",
         estimatedBudget: initialData?.estimatedBudget ?? "",
+        coverImageUrl: initialData?.coverImageUrl ?? "",
+        bannerImageUrl: initialData?.bannerImageUrl ?? "",
     });
+    const [coverUploading, setCoverUploading] = useState(false);
+    const [bannerUploading, setBannerUploading] = useState(false);
+
+    async function handleImageUpload(field: "coverImageUrl" | "bannerImageUrl", file: File, setLoading: (v: boolean) => void) {
+        setLoading(true);
+        try {
+            const fd = new FormData();
+            fd.append("file", file);
+            const res = await fetch("/api/upload", { method: "POST", body: fd });
+            const json = await res.json();
+            if (json.success) setMF(field, json.url);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const [destinations, setDestinations] = useState<ItineraryFormValues["destinationIds"]>(
         initialData?.destinationIds ?? []
@@ -719,6 +738,8 @@ export function ItineraryForm({ initialData, onSubmit, isSubmitting, submitInten
             minPeople: num(meta.minPeople),
             maxPeople: num(meta.maxPeople),
             estimatedBudget: num(meta.estimatedBudget),
+            coverImageUrl: meta.coverImageUrl || undefined,
+            bannerImageUrl: meta.bannerImageUrl || undefined,
             destinationIds: destinations,
             days,
         };
@@ -764,6 +785,111 @@ export function ItineraryForm({ initialData, onSubmit, isSubmitting, submitInten
                             <TagInput entityType="ITINERARY" entityId={entityId} value={tags ?? []} onChange={onTagsChange} />
                         </div>
                     )}
+                </div>
+            </Section>
+
+            {/* ── Images ── */}
+            <Section title="Images">
+                <div className="grid gap-5 sm:grid-cols-2">
+                    {/* Cover Image */}
+                    <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                            Cover Image
+                        </Label>
+                        <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 overflow-hidden">
+                            {meta.coverImageUrl ? (
+                                <div className="relative">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={meta.coverImageUrl} alt="Cover" className="w-full h-40 object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setMF("coverImageUrl", "")}
+                                        className="absolute top-2 right-2 rounded-full bg-white/90 p-1 text-gray-600 hover:text-destructive shadow"
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <label className="flex h-40 cursor-pointer flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                                    {coverUploading ? (
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                    ) : (
+                                        <>
+                                            <ImagePlus className="h-7 w-7" />
+                                            <span className="text-xs font-medium">Upload cover image</span>
+                                            <span className="text-[11px] text-muted-foreground">Shown on itinerary card</span>
+                                        </>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="sr-only"
+                                        onChange={(e) => {
+                                            const f = e.target.files?.[0];
+                                            if (f) handleImageUpload("coverImageUrl", f, setCoverUploading);
+                                            e.target.value = "";
+                                        }}
+                                    />
+                                </label>
+                            )}
+                        </div>
+                        <Input
+                            className="mt-2 h-8 text-xs font-mono"
+                            placeholder="Or paste image URL"
+                            value={meta.coverImageUrl}
+                            onChange={(e) => setMF("coverImageUrl", e.target.value)}
+                        />
+                    </div>
+
+                    {/* Banner Image */}
+                    <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                            Banner Image
+                        </Label>
+                        <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 overflow-hidden">
+                            {meta.bannerImageUrl ? (
+                                <div className="relative">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={meta.bannerImageUrl} alt="Banner" className="w-full h-40 object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setMF("bannerImageUrl", "")}
+                                        className="absolute top-2 right-2 rounded-full bg-white/90 p-1 text-gray-600 hover:text-destructive shadow"
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <label className="flex h-40 cursor-pointer flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                                    {bannerUploading ? (
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                    ) : (
+                                        <>
+                                            <ImagePlus className="h-7 w-7" />
+                                            <span className="text-xs font-medium">Upload banner image</span>
+                                            <span className="text-[11px] text-muted-foreground">Shown in hero / detail page</span>
+                                        </>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="sr-only"
+                                        onChange={(e) => {
+                                            const f = e.target.files?.[0];
+                                            if (f) handleImageUpload("bannerImageUrl", f, setBannerUploading);
+                                            e.target.value = "";
+                                        }}
+                                    />
+                                </label>
+                            )}
+                        </div>
+                        <Input
+                            className="mt-2 h-8 text-xs font-mono"
+                            placeholder="Or paste image URL"
+                            value={meta.bannerImageUrl}
+                            onChange={(e) => setMF("bannerImageUrl", e.target.value)}
+                        />
+                    </div>
                 </div>
             </Section>
 

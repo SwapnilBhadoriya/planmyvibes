@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ItineraryDetailHero from "@/components/itineraries/detail/ItineraryDetailHero";
 import ItineraryLeftSidebar from "@/components/itineraries/detail/ItineraryLeftSidebar";
 import DayTimeline from "@/components/itineraries/detail/DayTimeline";
@@ -597,6 +597,16 @@ export default function ItineraryDetailPage(_props: Props) {
     const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
         days[0]?.activities[0]?.id ?? null
     );
+    const detailPanelRef = useRef<HTMLDivElement>(null);
+
+    function selectActivity(id: string) {
+        setSelectedActivityId(id);
+        if (window.innerWidth < 1024) {
+            setTimeout(() => {
+                detailPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 50);
+        }
+    }
 
     const selectedDay = days[selectedDayIndex];
 
@@ -625,11 +635,41 @@ export default function ItineraryDetailPage(_props: Props) {
                 bestTimeLabel={data.bestTimeLabel}
             />
 
-            {/* 3-column body — 20% | 50% | 30% */}
-            <div className="mx-4 lg:mx-6 mt-5 grid grid-cols-10 gap-4 items-start">
+            {/* Mobile: day strip */}
+            <div className="lg:hidden mx-4 mt-4 overflow-x-auto">
+                <div className="flex gap-2 pb-1">
+                    {dayItems.map((day, i) => {
+                        const isActive = i === selectedDayIndex;
+                        return (
+                            <button
+                                key={day.dayNumber}
+                                onClick={() => {
+                                    setSelectedDayIndex(i);
+                                    setSelectedActivityId(days[i]?.activities[0]?.id ?? null);
+                                }}
+                                className={`shrink-0 flex items-center gap-2 rounded-2xl px-3 py-2 border transition-all ${
+                                    isActive
+                                        ? "border-purple-200 bg-purple-50 shadow-sm"
+                                        : "border-gray-100 bg-white shadow-sm"
+                                }`}
+                            >
+                                <span className={`text-[11px] font-bold whitespace-nowrap ${isActive ? "text-purple-600" : "text-gray-500"}`}>
+                                    Day {day.dayNumber}
+                                </span>
+                                <span className={`text-[11px] whitespace-nowrap hidden sm:inline ${isActive ? "text-purple-700" : "text-gray-700"}`}>
+                                    {day.title}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
 
-                {/* Left — 20% (2 of 10) */}
-                <div className="col-span-2">
+            {/* 3-column body — 20% | 50% | 30% */}
+            <div className="mx-4 lg:mx-6 mt-4 lg:mt-5 grid grid-cols-1 lg:grid-cols-10 gap-4 items-start">
+
+                {/* Left — 20% (hidden on mobile, shown on lg+) */}
+                <div className="hidden lg:block col-span-2">
                     <ItineraryLeftSidebar
                         days={dayItems}
                         selectedIndex={selectedDayIndex}
@@ -642,7 +682,7 @@ export default function ItineraryDetailPage(_props: Props) {
                 </div>
 
                 {/* Center — 50% (5 of 10) */}
-                <div className="col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-5">
+                <div className="col-span-1 lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 sm:px-5 py-4 sm:py-5">
                     <DayTimeline
                         dayNumber={selectedDay.dayNumber}
                         totalDays={days.length}
@@ -652,14 +692,30 @@ export default function ItineraryDetailPage(_props: Props) {
                         dayNote={selectedDay.dayNote}
                         activities={selectedDay.activities}
                         selectedActivityId={selectedActivityId}
-                        onSelectActivity={setSelectedActivityId}
+                        onSelectActivity={selectActivity}
                     />
                 </div>
 
                 {/* Right — 30% (3 of 10) */}
-                <div className="col-span-3">
+                <div ref={detailPanelRef} className="col-span-1 lg:col-span-3">
                     <ActivityDetailPanel activity={selectedActivity} />
                 </div>
+            </div>
+
+            {/* Mobile: Quick Tips below */}
+            <div className="lg:hidden mx-4 mt-4 mb-4 bg-violet-50 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="text-base leading-none">💡</span>
+                    <h4 className="text-[13px] font-bold text-purple-700">Quick Tips</h4>
+                </div>
+                <ul className="space-y-2">
+                    {data.quickTips.map((tip, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[11px] text-gray-600 leading-relaxed">
+                            <span className="text-purple-400 mt-0.5 shrink-0">•</span>
+                            {tip}
+                        </li>
+                    ))}
+                </ul>
             </div>
         </div>
     );

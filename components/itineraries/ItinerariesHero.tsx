@@ -29,7 +29,7 @@ export default function ItinerariesHero() {
             />
 
             {/* Gradient overlay — darkens left side so text is always readable */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none" />
 
             {/* Content */}
             <div className="relative z-10 px-6 sm:px-10 lg:px-16 pt-8 sm:pt-10 pb-14 sm:pb-20 lg:pb-28 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-end min-h-[240px] sm:min-h-[300px] lg:min-h-[380px]">

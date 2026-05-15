@@ -3,8 +3,6 @@ import Image from "next/image";
 const TEAM = [
     { name: "Ananya Sharma", role: "Founder & Travel Planner",     avatar: "https://i.pravatar.cc/120?img=47" },
     { name: "Rohit Verma",   role: "Content & Research Lead",      avatar: "https://i.pravatar.cc/120?img=12" },
-    { name: "Meera Iyer",    role: "Experience Curator",           avatar: "https://i.pravatar.cc/120?img=32" },
-    { name: "Karan Malhotra",role: "Design & Visual Storyteller",  avatar: "https://i.pravatar.cc/120?img=68" },
 ];
 
 const SIGNS = [
@@ -54,7 +52,7 @@ export default function TeamSection() {
                 </div>
 
                 {/* Team cards */}
-                <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-5 xl:gap-7">
+                <div className="flex-1 grid grid-cols-2 gap-5 xl:gap-7">
                     {TEAM.map((member) => (
                         <div key={member.name} className="flex flex-col items-center gap-2 text-center">
                             <Image

@@ -98,10 +98,6 @@ export default function ItineraryLeftSidebar({ days, selectedIndex, onSelectDay,
                 </div>
             )}
 
-            {/* View Travel Guide */}
-            <button className="mt-3 w-full flex items-center justify-center gap-1.5 border border-purple-300 text-purple-600 text-[12px] font-semibold rounded-xl py-2.5 hover:bg-purple-50 transition-colors">
-                View Travel Guide →
-            </button>
         </div>
     );
 }

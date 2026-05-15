@@ -118,6 +118,8 @@ const itineraryBaseSchema = z.object({
     maxPeople: z.number().int().positive().optional(),
     totalPlaces: z.number().int().nonnegative().optional(),
     estimatedBudget: z.number().int().nonnegative().optional(),
+    coverImageUrl: z.string().optional(),
+    bannerImageUrl: z.string().optional(),
     status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
     destinationIds: z.array(destinationEntrySchema).optional(),
     days: z.array(daySchema).optional(),

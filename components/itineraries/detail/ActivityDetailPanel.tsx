@@ -84,7 +84,7 @@ export default function ActivityDetailPanel({ activity }: PanelProps) {
 
             {/* ── Hero image with prev / next ── */}
             {currentImg && (
-                <div className="relative mx-4 rounded-2xl overflow-hidden" style={{ height: 210 }}>
+                <div className="relative mx-4 rounded-2xl overflow-hidden" style={{ height: 190 }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={currentImg}
@@ -188,13 +188,7 @@ export default function ActivityDetailPanel({ activity }: PanelProps) {
                 </div>
             )}
 
-            {/* ── View on Map ── */}
-            <div className="px-5 py-5 mt-1">
-                <button className="w-full border border-purple-200 rounded-xl py-2.5 flex items-center justify-center gap-2 text-[13px] font-semibold text-purple-600 hover:bg-purple-50 transition-colors">
-                    <MapPin size={14} className="text-purple-400" />
-                    View on Map
-                </button>
-            </div>
+            <div className="pb-5" />
         </div>
     );
 }

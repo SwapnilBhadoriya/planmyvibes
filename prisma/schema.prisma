@@ -115,6 +115,9 @@ model Itinerary {
   travelMode TravelMode?
   stayNights Int?
 
+  coverImageUrl  String? @db.Text
+  bannerImageUrl String? @db.Text
+
   status ContentStatus @default(DRAFT)
 
   createdAt DateTime @default(now())

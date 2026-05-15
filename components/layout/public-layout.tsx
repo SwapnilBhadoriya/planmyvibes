@@ -14,7 +14,11 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
             <Navbar />
-            {children}
+            {/* Spacer to push content below the fixed navbar (h-16 = 64px) */}
+            <div className="h-16" />
+            <div className="isolate">
+                {children}
+            </div>
             <Footer />
         </>
     );

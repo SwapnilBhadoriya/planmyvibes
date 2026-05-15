@@ -24,7 +24,7 @@ export default function BlogsHero() {
                 className="object-cover object-center"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none" />
 
             <div className="relative z-10 px-5 sm:px-8 xl:px-16 pt-7 sm:pt-10 pb-10 sm:pb-16 xl:pb-28 grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-4 xl:gap-10 items-end min-h-[240px] sm:min-h-[300px] xl:min-h-[380px]">
 

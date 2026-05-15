@@ -233,7 +233,7 @@ export default function DayTimeline({
                                     <img
                                         src={act.imageUrl!}
                                         alt={act.title}
-                                        className="h-14 w-20 rounded-xl object-cover shrink-0"
+                                        className="h-12 w-16 sm:h-14 sm:w-20 rounded-xl object-cover shrink-0"
                                         loading="lazy"
                                     />
                                 )}

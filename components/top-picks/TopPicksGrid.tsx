@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ViewIcon, HeartAddIcon } from "@hugeicons/core-free-icons";
 
 type BadgeColor = "green" | "blue" | "purple" | "orange" | "pink" | "teal" | "red" | "indigo";
 
 type Collection = {
+    id: number;
     badge: string;
     badgeColor: BadgeColor;
     title: string;
@@ -29,25 +31,25 @@ const BADGE_STYLES: Record<BadgeColor, string> = {
 };
 
 const ALL_COLLECTIONS: Collection[] = [
-    { badge: "Trending",        badgeColor: "green",  title: "Top Places in",           location: "Mumbai",     count: "25 places",     views: "15K", likes: "1.2K", gradient: "from-teal-400 via-cyan-600 to-blue-800" },
-    { badge: "Top Rated",       badgeColor: "blue",   title: "Best Cafes in",           location: "Chennai",    count: "18 cafes",      views: "12K", likes: "892",  gradient: "from-green-500 via-emerald-600 to-teal-800" },
-    { badge: "Popular",         badgeColor: "purple", title: "Weekend Getaways from",   location: "Delhi",      count: "15 places",     views: "10K", likes: "756",  gradient: "from-blue-400 via-indigo-600 to-purple-800" },
-    { badge: "Hidden Gem",      badgeColor: "orange", title: "Hidden Beaches in",       location: "Goa",        count: "12 beaches",    views: "8K",  likes: "623",  gradient: "from-orange-400 via-amber-500 to-yellow-600" },
-    { badge: "Foodie Pick",     badgeColor: "red",    title: "Must Try Street Food in", location: "Jaipur",     count: "20 places",     views: "9K",  likes: "689",  gradient: "from-red-400 via-rose-500 to-pink-700" },
-    { badge: "Family Friendly", badgeColor: "teal",   title: "Family Attractions in",   location: "Bangalore",  count: "15 places",     views: "7K",  likes: "512",  gradient: "from-purple-400 via-violet-500 to-indigo-700" },
-    { badge: "Romantic",        badgeColor: "pink",   title: "Romantic Spots in",       location: "Udaipur",    count: "10 places",     views: "6K",  likes: "445",  gradient: "from-pink-400 via-rose-500 to-red-600" },
-    { badge: "Adventure",       badgeColor: "indigo", title: "Adventure Activities in", location: "Manali",     count: "12 activities", views: "5K",  likes: "378",  gradient: "from-slate-500 via-blue-600 to-indigo-800" },
-    { badge: "Cultural",        badgeColor: "purple", title: "Heritage Walks in",       location: "Varanasi",   count: "14 spots",      views: "4K",  likes: "310",  gradient: "from-amber-500 via-orange-600 to-red-700" },
-    { badge: "Top Rated",       badgeColor: "green",  title: "Best Stays in",           location: "Coorg",      count: "10 resorts",    views: "3K",  likes: "278",  gradient: "from-green-400 via-lime-500 to-teal-700" },
-    { badge: "Trending",        badgeColor: "blue",   title: "Scenic Drives in",        location: "Himachal",   count: "8 routes",      views: "6K",  likes: "490",  gradient: "from-sky-400 via-blue-500 to-indigo-700" },
-    { badge: "Luxury",          badgeColor: "indigo", title: "Premium Experiences in",  location: "Rajasthan",  count: "16 places",     views: "5K",  likes: "401",  gradient: "from-rose-400 via-fuchsia-500 to-purple-700" },
+    { id: 1,  badge: "Trending",        badgeColor: "green",  title: "Top Places in",           location: "Mumbai",     count: "25 places",     views: "15K", likes: "1.2K", gradient: "from-teal-400 via-cyan-600 to-blue-800" },
+    { id: 2,  badge: "Top Rated",       badgeColor: "blue",   title: "Best Cafes in",           location: "Chennai",    count: "18 cafes",      views: "12K", likes: "892",  gradient: "from-green-500 via-emerald-600 to-teal-800" },
+    { id: 3,  badge: "Popular",         badgeColor: "purple", title: "Weekend Getaways from",   location: "Delhi",      count: "15 places",     views: "10K", likes: "756",  gradient: "from-blue-400 via-indigo-600 to-purple-800" },
+    { id: 4,  badge: "Hidden Gem",      badgeColor: "orange", title: "Hidden Beaches in",       location: "Goa",        count: "12 beaches",    views: "8K",  likes: "623",  gradient: "from-orange-400 via-amber-500 to-yellow-600" },
+    { id: 5,  badge: "Foodie Pick",     badgeColor: "red",    title: "Must Try Street Food in", location: "Jaipur",     count: "20 places",     views: "9K",  likes: "689",  gradient: "from-red-400 via-rose-500 to-pink-700" },
+    { id: 6,  badge: "Family Friendly", badgeColor: "teal",   title: "Family Attractions in",   location: "Bangalore",  count: "15 places",     views: "7K",  likes: "512",  gradient: "from-purple-400 via-violet-500 to-indigo-700" },
+    { id: 7,  badge: "Romantic",        badgeColor: "pink",   title: "Romantic Spots in",       location: "Udaipur",    count: "10 places",     views: "6K",  likes: "445",  gradient: "from-pink-400 via-rose-500 to-red-600" },
+    { id: 8,  badge: "Adventure",       badgeColor: "indigo", title: "Adventure Activities in", location: "Manali",     count: "12 activities", views: "5K",  likes: "378",  gradient: "from-slate-500 via-blue-600 to-indigo-800" },
+    { id: 9,  badge: "Cultural",        badgeColor: "purple", title: "Heritage Walks in",       location: "Varanasi",   count: "14 spots",      views: "4K",  likes: "310",  gradient: "from-amber-500 via-orange-600 to-red-700" },
+    { id: 10, badge: "Top Rated",       badgeColor: "green",  title: "Best Stays in",           location: "Coorg",      count: "10 resorts",    views: "3K",  likes: "278",  gradient: "from-green-400 via-lime-500 to-teal-700" },
+    { id: 11, badge: "Trending",        badgeColor: "blue",   title: "Scenic Drives in",        location: "Himachal",   count: "8 routes",      views: "6K",  likes: "490",  gradient: "from-sky-400 via-blue-500 to-indigo-700" },
+    { id: 12, badge: "Luxury",          badgeColor: "indigo", title: "Premium Experiences in",  location: "Rajasthan",  count: "16 places",     views: "5K",  likes: "401",  gradient: "from-rose-400 via-fuchsia-500 to-purple-700" },
 ];
 
 const PAGE_SIZE = 8;
 
 function CollectionCard({ item }: { item: Collection }) {
     return (
-        <div className={`relative h-48 sm:h-56 xl:h-64 w-full rounded-2xl overflow-hidden cursor-pointer group bg-gradient-to-b ${item.gradient}`}>
+        <Link href={`/top-picks/${item.id}`} className={`relative h-48 sm:h-56 xl:h-64 w-full rounded-2xl overflow-hidden cursor-pointer group bg-gradient-to-b ${item.gradient} block`}>
 
             {/* Badge */}
             <span className={`absolute top-2.5 left-2.5 ${BADGE_STYLES[item.badgeColor]} text-white text-[10px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5`}>
@@ -72,7 +74,7 @@ function CollectionCard({ item }: { item: Collection }) {
                     <span className="text-xs text-white/70">{item.likes}</span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 

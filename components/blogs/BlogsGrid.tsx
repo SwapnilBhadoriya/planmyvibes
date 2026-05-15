@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Clock01Icon, HeartAddIcon, ViewIcon } from "@hugeicons/core-free-icons";
 
@@ -48,7 +49,7 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
     const mins = readTime(blog.content);
 
     return (
-        <div className="group rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer bg-white flex flex-col">
+        <Link href={`/blog/${blog.id}`} className="group rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer bg-white flex flex-col">
             {/* Cover */}
             <div className={`relative h-40 sm:h-48 xl:h-52 w-full bg-gradient-to-b ${gradient} shrink-0`}>
                 {blog.coverImage && (
@@ -88,7 +89,7 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
                     </span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 

@@ -62,6 +62,8 @@ export function toPayload(values: ItineraryFormValues) {
             minPeople: values.minPeople,
             maxPeople: values.maxPeople,
             estimatedBudget: values.estimatedBudget,
+            coverImageUrl: values.coverImageUrl,
+            bannerImageUrl: values.bannerImageUrl,
         }),
         destinationIds: values.destinationIds.map(({ destinationId, position }) => ({ destinationId, position })),
         days: values.days.map((day, di) => dayPayload(day, di)),

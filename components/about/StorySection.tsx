@@ -51,7 +51,7 @@ export default function StorySection() {
                     height={300}
                     className="w-full sm:w-32 h-40 sm:h-40 rounded-xl object-cover flex-shrink-0"
                 />
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2.5">
                     <p className="text-[11px] font-bold text-purple-600 uppercase tracking-wider">Our Story</p>
                     <h2 className="text-lg font-extrabold text-gray-900 leading-snug">
                         Born from a love for travel and good vibes
@@ -59,12 +59,15 @@ export default function StorySection() {
                     <p className="text-xs text-gray-500 leading-relaxed">
                         TripVibee started with a simple idea — travel should be easy to plan, fun to experience and impossible to forget. After countless trips, notes and shared itineraries with friends, we knew it was time to create a space where real travelers could find real inspiration.
                     </p>
-                    <a href="#" className="inline-flex items-center gap-1 text-purple-600 text-sm font-semibold hover:underline mt-1">
-                        Our Journey
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                        </svg>
-                    </a>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                        What began as a Google Doc shared between two friends planning a road trip through Rajasthan turned into something much bigger. We realized that most travel platforms felt cold, generic and overwhelming. We wanted something that felt like advice from a friend who truly gets your vibe.
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                        Today, TripVibee is a growing community of explorers, storytellers and dreamers. Whether you're chasing sunsets in Goa, hunting for hidden temples in Varanasi or planning your first solo adventure, we're here to make every trip feel effortless and unforgettable.
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                        Every guide we write, every itinerary we curate and every destination we feature is backed by real experience — not press trips or paid placements. Just honest, heartfelt travel content made by people who live and breathe this stuff.
+                    </p>
                 </div>
             </div>
 

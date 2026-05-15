@@ -11,7 +11,7 @@ const pacifico = Pacifico({
 
 export default function HeroSection() {
     return (
-        <section className="relative overflow-hidden mx-3 sm:mx-4 xl:mx-6 rounded-2xl xl:rounded-3xl min-h-[500px] md:min-h-[540px] xl:min-h-[420px]">
+        <section className="relative overflow-hidden mx-3 sm:mx-4 xl:mx-6 rounded-2xl xl:rounded-3xl min-h-[400px] md:min-h-[460px] xl:min-h-[360px]">
 
             {/* Mobile image (hero2) — below md */}
             <Image
@@ -41,7 +41,7 @@ export default function HeroSection() {
             />
 
             {/* Dark overlay */}
-            <div className="absolute inset-0 bg-black/40 md:bg-black/35 xl:bg-black/25" />
+            <div className="absolute inset-0 bg-black/40 md:bg-black/35 xl:bg-black/25 pointer-events-none" />
 
             {/* Content */}
             <div className="relative z-10 px-5 sm:px-8 md:px-10 xl:px-16 pt-8 sm:pt-10 pb-6 grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 xl:gap-10 items-center">
